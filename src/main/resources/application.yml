@@ -1,0 +1,80 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: citycharge-service
+  
+  datasource:
+    url: jdbc:mysql://localhost:3306/citycharge?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+  
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 3000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+# 自定义配置
+citycharge:
+  map:
+    width: 100
+    height: 100
+    file-path: classpath:map/map.txt
+  
+  battery:
+    min-voltage: 3.0
+    max-voltage: 4.2
+    
+  alarm:
+    low-battery-threshold: 0.2
+    high-temperature-threshold: 60
+    low-temperature-threshold: 0
+    
+  notification:
+    charging-station-threshold: 0.3
+
+# 日志配置
+logging:
+  level:
+    com.citycharge: DEBUG
+    org.springframework.web: INFO
+  file:
+    name: logs/citycharge-service.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Swagger配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  paths-to-match:
+    - /api/**

@@ -1,0 +1,54 @@
+# Compiled class files
+*.class
+
+# Log files
+*.log
+logs/
+
+# Maven target directory
+target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Application properties with sensitive data
+application-*.properties
+!application.yml
+
+# Build outputs
+build/
+*.jar
+*.war
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.backup
+
+# Maven wrapper (optional, include if you want to exclude)
+# .mvn/
+
+# Database files
+*.db
+
+# Environment files
+.env
+.env.local
+
+# Test reports
+test-output/
+
+# Dependency cache
+.cache/
