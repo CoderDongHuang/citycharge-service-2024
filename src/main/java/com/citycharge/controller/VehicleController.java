@@ -1,58 +1,107 @@
 package com.citycharge.controller;
 
-import com.citycharge.dto.VehicleStatusDTO;
+import com.citycharge.common.ApiResponse;
+import com.citycharge.dto.VehicleDTO;
+import com.citycharge.dto.VehicleStatusUpdateDTO;
 import com.citycharge.entity.Vehicle;
 import com.citycharge.service.VehicleService;
-import org.springframework.http.ResponseEntity;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/vehicles")
+@RequestMapping("/vehicles")
+@RequiredArgsConstructor
 public class VehicleController {
     
     private final VehicleService vehicleService;
     
-    public VehicleController(VehicleService vehicleService) {
-        this.vehicleService = vehicleService;
-    }
-    
-    @PostMapping("/{vid}/register")
-    public ResponseEntity<Vehicle> registerVehicle(@PathVariable String vid) {
-        Vehicle vehicle = vehicleService.registerVehicle(vid);
-        return ResponseEntity.ok(vehicle);
-    }
-    
-    @PostMapping("/{vid}/status")
-    public ResponseEntity<Vehicle> updateVehicleStatus(@PathVariable String vid, @RequestBody VehicleStatusDTO statusDTO) {
-        Vehicle vehicle = vehicleService.updateVehicleStatus(statusDTO);
-        return ResponseEntity.ok(vehicle);
-    }
-    
-    @GetMapping("/online")
-    public ResponseEntity<List<Vehicle>> getOnlineVehicles() {
-        List<Vehicle> vehicles = vehicleService.getAllOnlineVehicles();
-        return ResponseEntity.ok(vehicles);
+    @GetMapping("")
+    public ApiResponse<List<VehicleDTO>> getAllVehicles() {
+        List<VehicleDTO> vehicles = vehicleService.findAll().stream()
+                .map(VehicleDTO::fromEntity)
+                .collect(Collectors.toList());
+        return ApiResponse.success(vehicles);
     }
     
     @GetMapping("/{vid}")
-    public ResponseEntity<Vehicle> getVehicle(@PathVariable String vid) {
-        Vehicle vehicle = vehicleService.getVehicleByVid(vid);
-        return ResponseEntity.ok(vehicle);
+    public ApiResponse<VehicleDTO> getVehicleByVid(@PathVariable String vid) {
+        Vehicle vehicle = vehicleService.findByVid(vid);
+        if (vehicle == null) {
+            return ApiResponse.error(404, "车辆不存在");
+        }
+        return ApiResponse.success(VehicleDTO.fromEntity(vehicle));
     }
     
-    @PostMapping("/{vid}/position")
-    public ResponseEntity<Boolean> updatePosition(@PathVariable String vid, 
-                                                 @RequestParam Integer x, 
-                                                 @RequestParam Integer y) {
-        boolean success = vehicleService.updateVehiclePosition(vid, x, y);
-        return ResponseEntity.ok(success);
+    @PutMapping("/vehicles/{vid}/status")
+    public ApiResponse<String> updateVehicleStatus(@PathVariable String vid, @RequestBody VehicleStatusUpdateDTO statusUpdate) {
+        try {
+            Vehicle vehicle = vehicleService.findByVid(vid);
+            if (vehicle == null) {
+                return ApiResponse.error(404, "车辆不存在");
+            }
+            
+            // 更新车辆状态
+            if (statusUpdate.getVoltage() != null) {
+                vehicle.setVoltage(statusUpdate.getVoltage());
+            }
+            if (statusUpdate.getTemperature() != null) {
+                vehicle.setTemperature(statusUpdate.getTemperature());
+            }
+            if (statusUpdate.getBatteryLevel() != null) {
+                vehicle.setBatteryLevel(statusUpdate.getBatteryLevel());
+            }
+            if (statusUpdate.getLightStatus() != null) {
+                vehicle.setLightStatus(Vehicle.LightStatus.valueOf(statusUpdate.getLightStatus()));
+            }
+            if (statusUpdate.getPosition() != null) {
+                vehicle.setPositionX(statusUpdate.getPosition().getX());
+                vehicle.setPositionY(statusUpdate.getPosition().getY());
+            }
+            if (statusUpdate.getOnline() != null) {
+                vehicle.setOnlineStatus(statusUpdate.getOnline());
+            }
+            
+            vehicleService.save(vehicle);
+            return ApiResponse.success("状态更新成功");
+        } catch (Exception e) {
+            return ApiResponse.error("状态更新失败: " + e.getMessage());
+        }
     }
     
-    @PostMapping("/{vid}/heartbeat")
-    public ResponseEntity<Void> heartbeat(@PathVariable String vid) {
-        vehicleService.handleVehicleHeartbeat(vid);
-        return ResponseEntity.ok().build();
+
+    
+    @PostMapping("/vehicles")
+    public ApiResponse<VehicleDTO> createVehicle(@RequestBody Vehicle vehicle) {
+        try {
+            Vehicle savedVehicle = vehicleService.save(vehicle);
+            return ApiResponse.success("车辆创建成功", VehicleDTO.fromEntity(savedVehicle));
+        } catch (Exception e) {
+            return ApiResponse.error("车辆创建失败: " + e.getMessage());
+        }
     }
+    
+    @PutMapping("/vehicles/{vid}")
+    public ApiResponse<VehicleDTO> updateVehicle(@PathVariable String vid, @RequestBody Vehicle vehicle) {
+        try {
+            Vehicle updatedVehicle = vehicleService.update(vid, vehicle);
+            return ApiResponse.success("车辆更新成功", VehicleDTO.fromEntity(updatedVehicle));
+        } catch (Exception e) {
+            return ApiResponse.error("车辆更新失败: " + e.getMessage());
+        }
+    }
+    
+    @DeleteMapping("/vehicles/{vid}")
+    public ApiResponse<String> deleteVehicle(@PathVariable String vid) {
+        try {
+            vehicleService.deleteByVid(vid);
+            return ApiResponse.success("车辆删除成功");
+        } catch (Exception e) {
+            return ApiResponse.error("车辆删除失败: " + e.getMessage());
+        }
+    }
+    
 }

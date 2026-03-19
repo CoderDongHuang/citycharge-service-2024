@@ -1,35 +1,48 @@
 package com.citycharge.controller;
 
+import com.citycharge.common.ApiResponse;
 import com.citycharge.dto.ControlCommandDTO;
 import com.citycharge.service.WebSocketService;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/control")
+@RequestMapping("/control")
+@RequiredArgsConstructor
 public class ControlController {
     
     private final WebSocketService webSocketService;
     
-    public ControlController(WebSocketService webSocketService) {
-        this.webSocketService = webSocketService;
+    @PostMapping("/vehicles/{vid}/lights")
+    public ApiResponse<String> controlHeadlight(@PathVariable String vid, @RequestBody ControlCommandDTO command) {
+        try {
+            command.setVid(vid);
+            webSocketService.sendControlCommand(vid, command);
+            return ApiResponse.success("灯光控制指令发送成功");
+        } catch (Exception e) {
+            return ApiResponse.error("灯光控制失败: " + e.getMessage());
+        }
     }
     
-    @PostMapping("/headlight")
-    public ResponseEntity<Void> controlHeadlight(@RequestBody ControlCommandDTO command) {
-        webSocketService.sendControlCommand(command.getVid(), command);
-        return ResponseEntity.ok().build();
+    @PostMapping("/vehicles/{vid}/horn")
+    public ApiResponse<String> controlHorn(@PathVariable String vid, @RequestBody ControlCommandDTO command) {
+        try {
+            command.setVid(vid);
+            webSocketService.sendControlCommand(vid, command);
+            return ApiResponse.success("喇叭控制指令发送成功");
+        } catch (Exception e) {
+            return ApiResponse.error("喇叭控制失败: " + e.getMessage());
+        }
     }
     
-    @PostMapping("/horn")
-    public ResponseEntity<Void> controlHorn(@RequestBody ControlCommandDTO command) {
-        webSocketService.sendControlCommand(command.getVid(), command);
-        return ResponseEntity.ok().build();
-    }
-    
-    @PostMapping("/notification")
-    public ResponseEntity<Void> sendNotification(@RequestBody ControlCommandDTO command) {
-        webSocketService.sendVehicleStatusUpdate(command.getVid(), command);
-        return ResponseEntity.ok().build();
+    @PostMapping("/vehicles/{vid}/notification")
+    public ApiResponse<String> sendNotification(@PathVariable String vid, @RequestBody ControlCommandDTO command) {
+        try {
+            command.setVid(vid);
+            webSocketService.sendVehicleStatusUpdate(vid, command);
+            return ApiResponse.success("通知发送成功");
+        } catch (Exception e) {
+            return ApiResponse.error("通知发送失败: " + e.getMessage());
+        }
     }
 }

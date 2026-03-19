@@ -15,13 +15,13 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     
     Optional<Vehicle> findByVid(String vid);
     
-    List<Vehicle> findByIsOnlineTrue();
+    List<Vehicle> findByOnlineStatusTrue();
     
-    @Query("SELECT v FROM Vehicle v WHERE v.lastHeartbeat < :threshold")
+    @Query("SELECT v FROM Vehicle v WHERE v.lastUpdate < :threshold")
     List<Vehicle> findOfflineVehicles(@Param("threshold") LocalDateTime threshold);
     
-    @Query("SELECT v FROM Vehicle v WHERE v.isAlarming = true")
-    List<Vehicle> findAlarmingVehicles();
+    @Query("SELECT v FROM Vehicle v WHERE v.batteryLevel < 20")
+    List<Vehicle> findLowBatteryVehicles();
     
     @Query("SELECT v FROM Vehicle v WHERE v.positionX = :x AND v.positionY = :y")
     Optional<Vehicle> findByPosition(@Param("x") Integer x, @Param("y") Integer y);

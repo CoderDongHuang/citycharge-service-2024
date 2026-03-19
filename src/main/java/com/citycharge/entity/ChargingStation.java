@@ -1,11 +1,9 @@
 package com.citycharge.entity;
 
-import lombok.Data;
 import javax.persistence.*;
 
 @Entity
 @Table(name = "charging_stations")
-@Data
 public class ChargingStation {
     
     @Id
@@ -29,4 +27,26 @@ public class ChargingStation {
     
     @Column(name = "is_active")
     private Boolean isActive = true;
+
+    // Getter and Setter methods
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getStationId() { return stationId; }
+    public void setStationId(String stationId) { this.stationId = stationId; }
+    
+    public Integer getPositionX() { return positionX; }
+    public void setPositionX(Integer positionX) { this.positionX = positionX; }
+    
+    public Integer getPositionY() { return positionY; }
+    public void setPositionY(Integer positionY) { this.positionY = positionY; }
+    
+    public Integer getAvailableBatteries() { return availableBatteries; }
+    public void setAvailableBatteries(Integer availableBatteries) { this.availableBatteries = availableBatteries; }
+    
+    public Integer getTotalCapacity() { return totalCapacity; }
+    public void setTotalCapacity(Integer totalCapacity) { this.totalCapacity = totalCapacity; }
+    
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }

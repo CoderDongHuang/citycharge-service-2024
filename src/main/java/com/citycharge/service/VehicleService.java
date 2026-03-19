@@ -1,40 +1,52 @@
 package com.citycharge.service;
 
-import com.citycharge.dto.VehicleStatusDTO;
 import com.citycharge.entity.Vehicle;
+import com.citycharge.repository.VehicleRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class VehicleService {
     
-    public Vehicle registerVehicle(String vid) {
-        // 车辆注册逻辑
+    private final VehicleRepository vehicleRepository;
+    
+    public List<Vehicle> findAll() {
+        return vehicleRepository.findAll();
+    }
+    
+    public Vehicle findByVid(String vid) {
+        Optional<Vehicle> vehicle = vehicleRepository.findByVid(vid);
+        return vehicle.orElse(null);
+    }
+    
+    public Vehicle save(Vehicle vehicle) {
+        return vehicleRepository.save(vehicle);
+    }
+    
+    public Vehicle update(String vid, Vehicle vehicle) {
+        Vehicle existingVehicle = findByVid(vid);
+        if (existingVehicle != null) {
+            vehicle.setId(existingVehicle.getId());
+            return vehicleRepository.save(vehicle);
+        }
         return null;
     }
     
-    public Vehicle updateVehicleStatus(VehicleStatusDTO statusDTO) {
-        // 更新车辆状态
-        return null;
+    public void deleteByVid(String vid) {
+        Vehicle vehicle = findByVid(vid);
+        if (vehicle != null) {
+            vehicleRepository.delete(vehicle);
+        }
     }
     
-    public List<Vehicle> getAllOnlineVehicles() {
-        // 获取所有在线车辆
-        return null;
-    }
-    
-    public Vehicle getVehicleByVid(String vid) {
-        // 根据VID获取车辆
-        return null;
-    }
-    
-    public boolean updateVehiclePosition(String vid, Integer x, Integer y) {
-        // 更新车辆位置
-        return false;
-    }
-    
-    public void handleVehicleHeartbeat(String vid) {
-        // 处理车辆心跳
+    public List<Vehicle> findByOnlineStatus(Boolean online) {
+        if (online != null && online) {
+            return vehicleRepository.findByOnlineStatusTrue();
+        }
+        return vehicleRepository.findAll();
     }
 }

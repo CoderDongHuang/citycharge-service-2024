@@ -14,13 +14,11 @@ public interface BatteryRepository extends JpaRepository<Battery, Long> {
     
     Optional<Battery> findByPid(String pid);
     
-    List<Battery> findByIsInUseTrue();
+    List<Battery> findByStatus(Battery.BatteryStatus status);
     
-    List<Battery> findByIsAvailableTrueAndIsInUseFalse();
+    @Query("SELECT b FROM Battery b WHERE b.currentVehicle = :vid")
+    Optional<Battery> findByCurrentVehicle(@Param("vid") String vid);
     
-    @Query("SELECT b FROM Battery b WHERE b.currentVid = :vid")
-    Optional<Battery> findByCurrentVid(@Param("vid") String vid);
-    
-    @Query("SELECT b FROM Battery b WHERE b.capacityPercentage < :threshold")
+    @Query("SELECT b FROM Battery b WHERE b.remainingCapacity < :threshold")
     List<Battery> findLowCapacityBatteries(@Param("threshold") Double threshold);
 }

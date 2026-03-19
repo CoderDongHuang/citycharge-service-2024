@@ -12,13 +12,13 @@ import java.util.List;
 @Repository
 public interface BatteryHistoryRepository extends JpaRepository<BatteryHistory, Long> {
     
-    List<BatteryHistory> findByPidOrderByRecordTimeDesc(String pid);
+    List<BatteryHistory> findByPidOrderByTimestampDesc(String pid);
     
-    @Query("SELECT bh FROM BatteryHistory bh WHERE bh.pid = :pid AND bh.recordTime BETWEEN :start AND :end ORDER BY bh.recordTime ASC")
+    @Query("SELECT bh FROM BatteryHistory bh WHERE bh.pid = :pid AND bh.timestamp BETWEEN :start AND :end ORDER BY bh.timestamp ASC")
     List<BatteryHistory> findByPidAndTimeRange(@Param("pid") String pid, 
                                               @Param("start") LocalDateTime start, 
                                               @Param("end") LocalDateTime end);
     
-    @Query("SELECT bh FROM BatteryHistory bh WHERE bh.vid = :vid ORDER BY bh.recordTime DESC")
+    @Query("SELECT bh FROM BatteryHistory bh WHERE bh.vid = :vid ORDER BY bh.timestamp DESC")
     List<BatteryHistory> findByVid(@Param("vid") String vid);
 }

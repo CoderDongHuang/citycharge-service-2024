@@ -1,27 +1,41 @@
 package com.citycharge.service;
 
 import com.citycharge.entity.AlarmRecord;
+import com.citycharge.repository.AlarmRecordRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AlarmService {
     
-    public void checkBatteryAlarms(String vid, String pid, Double voltage, Double temperature, Double capacity, Integer x, Integer y) {
-        // 检查电池报警条件
+    private final AlarmRecordRepository alarmRecordRepository;
+    
+    public List<AlarmRecord> findAll() {
+        return alarmRecordRepository.findAll();
     }
     
-    public void createAlarmRecord(String vid, String pid, String alarmType, String message, Double voltage, Double temperature, Double capacity, Integer x, Integer y) {
-        // 创建报警记录
+    public AlarmRecord findById(Long id) {
+        Optional<AlarmRecord> alarmRecord = alarmRecordRepository.findById(id);
+        return alarmRecord.orElse(null);
     }
     
-    public List<AlarmRecord> getRecentAlarms() {
-        // 获取最近的报警记录
-        return null;
+    public List<AlarmRecord> findByResolved(Boolean resolved) {
+        return alarmRecordRepository.findByIsResolved(resolved);
     }
     
-    public void resolveAlarm(Long alarmId) {
-        // 解决报警
+    public List<AlarmRecord> findByAlarmType(String alarmType) {
+        return alarmRecordRepository.findByAlarmType(alarmType);
+    }
+    
+    public AlarmRecord save(AlarmRecord alarmRecord) {
+        return alarmRecordRepository.save(alarmRecord);
+    }
+    
+    public List<AlarmRecord> findUnresolvedAlarms() {
+        return alarmRecordRepository.findByIsResolvedFalse();
     }
 }
