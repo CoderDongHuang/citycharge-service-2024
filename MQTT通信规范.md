@@ -60,7 +60,7 @@ system/broadcast
 ## 4. MQTT消息格式规范
 
 ### 4.1 车辆状态上报消息
-**主题**: `vehicle/{vid}/status`
+**主题**: `vehicle/{vid}/status`（完成/2026-3-22）
 
 **消息格式**:
 ```json
@@ -93,7 +93,7 @@ system/broadcast
 ### 4.2 车辆控制指令消息
 **主题**: `vehicle/{vid}/control`
 
-**灯光控制消息格式**:
+**灯光控制消息格式**:（完成/2026-3-23）
 ```json
 {
   "timestamp": "2024-01-18T10:35:00Z",
