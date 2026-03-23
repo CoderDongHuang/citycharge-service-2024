@@ -63,6 +63,13 @@ public class MqttMessageListenerConfig {
         }
     }
     
+    /**
+     * 获取MQTT客户端实例
+     */
+    public MqttClient getMqttClient() {
+        return mqttClient;
+    }
+    
     @PreDestroy
     public void destroy() {
         if (mqttClient != null && mqttClient.isConnected()) {

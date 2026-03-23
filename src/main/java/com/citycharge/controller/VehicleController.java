@@ -5,6 +5,7 @@ import com.citycharge.dto.VehicleDTO;
 import com.citycharge.dto.VehicleStatusUpdateDTO;
 import com.citycharge.entity.Vehicle;
 import com.citycharge.service.VehicleService;
+import com.citycharge.service.VehicleControlService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class VehicleController {
     
     private final VehicleService vehicleService;
+    private final VehicleControlService vehicleControlService;
     
     @GetMapping("")
     public ApiResponse<List<VehicleDTO>> getAllVehicles() {
@@ -36,7 +38,7 @@ public class VehicleController {
         return ApiResponse.success(VehicleDTO.fromEntity(vehicle));
     }
     
-    @PutMapping("/vehicles/{vid}/status")
+    @PutMapping("/{vid}/status")
     public ApiResponse<String> updateVehicleStatus(@PathVariable String vid, @RequestBody VehicleStatusUpdateDTO statusUpdate) {
         try {
             Vehicle vehicle = vehicleService.findByVid(vid);
@@ -72,9 +74,74 @@ public class VehicleController {
         }
     }
     
+    /**
+     * 发送车辆控制指令 (REST API方式)
+     */
+    @PostMapping("/{vid}/control")
+    public ApiResponse<String> controlVehicle(@PathVariable String vid, @RequestBody com.citycharge.dto.ControlCommand command) {
+        try {
+            // 验证指令参数
+            if (!vehicleControlService.validateCommand(command)) {
+                return ApiResponse.error(400, "控制指令参数无效");
+            }
+            
+            // 发送控制指令
+            boolean success = vehicleControlService.sendControlCommand(vid, command);
+            
+            if (success) {
+                return ApiResponse.success("控制指令发送成功");
+            } else {
+                return ApiResponse.error("控制指令发送失败，车辆可能不在线");
+            }
+            
+        } catch (Exception e) {
+            return ApiResponse.error("控制指令发送失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 灯光控制接口
+     */
+    @PostMapping("/{vid}/control/lights")
+    public ApiResponse<String> controlLights(@PathVariable String vid, @RequestParam String status) {
+        try {
+            boolean success = vehicleControlService.controlLights(vid, status);
+            
+            if (success) {
+                return ApiResponse.success("灯光控制指令发送成功");
+            } else {
+                return ApiResponse.error("灯光控制指令发送失败");
+            }
+            
+        } catch (Exception e) {
+            return ApiResponse.error("灯光控制失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 闪烁灯光接口
+     */
+    @PostMapping("/{vid}/control/flash")
+    public ApiResponse<String> flashLights(@PathVariable String vid, 
+                                          @RequestParam String pattern,
+                                          @RequestParam int duration) {
+        try {
+            boolean success = vehicleControlService.flashLights(vid, pattern, duration);
+            
+            if (success) {
+                return ApiResponse.success("闪烁灯光指令发送成功");
+            } else {
+                return ApiResponse.error("闪烁灯光指令发送失败");
+            }
+            
+        } catch (Exception e) {
+            return ApiResponse.error("闪烁灯光失败: " + e.getMessage());
+        }
+    }
+    
 
     
-    @PostMapping("/vehicles")
+    @PostMapping("")
     public ApiResponse<VehicleDTO> createVehicle(@RequestBody Vehicle vehicle) {
         try {
             Vehicle savedVehicle = vehicleService.save(vehicle);
@@ -84,7 +151,7 @@ public class VehicleController {
         }
     }
     
-    @PutMapping("/vehicles/{vid}")
+    @PutMapping("/{vid}")
     public ApiResponse<VehicleDTO> updateVehicle(@PathVariable String vid, @RequestBody Vehicle vehicle) {
         try {
             Vehicle updatedVehicle = vehicleService.update(vid, vehicle);
@@ -94,7 +161,7 @@ public class VehicleController {
         }
     }
     
-    @DeleteMapping("/vehicles/{vid}")
+    @DeleteMapping("/{vid}")
     public ApiResponse<String> deleteVehicle(@PathVariable String vid) {
         try {
             vehicleService.deleteByVid(vid);
