@@ -139,6 +139,27 @@ public class VehicleController {
         }
     }
     
+    /**
+     * 喇叭控制接口
+     */
+    @PostMapping("/{vid}/control/horn")
+    public ApiResponse<String> beepHorn(@PathVariable String vid, 
+                                       @RequestParam String pattern,
+                                       @RequestParam int interval) {
+        try {
+            boolean success = vehicleControlService.beepHorn(vid, pattern, interval);
+            
+            if (success) {
+                return ApiResponse.success("喇叭控制指令发送成功");
+            } else {
+                return ApiResponse.error("喇叭控制指令发送失败");
+            }
+            
+        } catch (Exception e) {
+            return ApiResponse.error("喇叭控制失败: " + e.getMessage());
+        }
+    }
+    
 
     
     @PostMapping("")

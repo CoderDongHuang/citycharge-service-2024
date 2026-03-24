@@ -117,6 +117,24 @@ public class VehicleControlService {
     }
     
     /**
+     * 喇叭控制指令
+     * @param vid 车辆编号
+     * @param pattern 鸣笛模式 (single, double, triple, continuous)
+     * @param interval 间隔时间(毫秒)
+     * @return 发送结果
+     */
+    public boolean beepHorn(String vid, String pattern, int interval) {
+        ControlCommand command = new ControlCommand();
+        command.setCommand("beepHorn");
+        java.util.Map<String, Object> params = new java.util.HashMap<>();
+        params.put("pattern", pattern);
+        params.put("interval", interval);
+        command.setParams(params);
+        
+        return sendControlCommand(vid, command);
+    }
+    
+    /**
      * 记录操作日志
      */
     private void logOperation(String vid, ControlCommand command) {
@@ -140,6 +158,8 @@ public class VehicleControlService {
                 return validateLightStatusParams(command.getParams());
             case "setOnlineStatus":
                 return validateOnlineStatusParams(command.getParams());
+            case "beepHorn":
+                return validateBeepHornParams(command.getParams());
             default:
                 log.warn("未知的控制指令: {}", command.getCommand());
                 return false;
@@ -170,5 +190,37 @@ public class VehicleControlService {
         
         Boolean online = (Boolean) params.get("online");
         return online != null;
+    }
+    
+    private boolean validateBeepHornParams(java.util.Map<String, Object> params) {
+        if (params == null) return false;
+        
+        String pattern = (String) params.get("pattern");
+        Integer interval = (Integer) params.get("interval");
+        
+        // 验证模式参数
+        if (pattern == null || pattern.isEmpty()) {
+            return false;
+        }
+        
+        // 支持的模式类型 (使用Java 8兼容的方式)
+        java.util.Set<String> validPatterns = new java.util.HashSet<>();
+        validPatterns.add("single");
+        validPatterns.add("double");
+        validPatterns.add("triple");
+        validPatterns.add("continuous");
+        
+        if (!validPatterns.contains(pattern)) {
+            log.warn("无效的喇叭模式: {}", pattern);
+            return false;
+        }
+        
+        // 验证间隔参数
+        if (interval == null || interval < 100 || interval > 5000) {
+            log.warn("无效的间隔时间: {}ms (范围: 100-5000ms)", interval);
+            return false;
+        }
+        
+        return true;
     }
 }
