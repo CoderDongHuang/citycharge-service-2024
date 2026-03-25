@@ -1,6 +1,7 @@
 package com.citycharge.config;
 
 import com.citycharge.service.MqttVehicleStatusService;
+import com.citycharge.service.VehicleOnlineStatusService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -20,6 +21,7 @@ import javax.annotation.PreDestroy;
 public class MqttMessageListenerConfig {
     
     private final MqttVehicleStatusService vehicleStatusService;
+    private final VehicleOnlineStatusService onlineStatusService;
     private MqttClient mqttClient;
     
     @EventListener(ApplicationReadyEvent.class)
@@ -46,7 +48,13 @@ public class MqttMessageListenerConfig {
                 handleVehicleStatusMessage(topic, message);
             });
             
-            log.info("MQTT订阅成功，主题: {}", vehicleStatusTopic);
+            // 订阅车辆在线状态主题
+            String vehicleOnlineTopic = "vehicle/+/online";
+            mqttClient.subscribe(vehicleOnlineTopic, 1, (topic, message) -> {
+                handleOnlineStatusMessage(topic, message);
+            });
+            
+            log.info("MQTT订阅成功，主题: {}, {}", vehicleStatusTopic, vehicleOnlineTopic);
             
         } catch (Exception e) {
             log.error("MQTT初始化失败: {}", e.getMessage(), e);
@@ -60,6 +68,33 @@ public class MqttMessageListenerConfig {
             vehicleStatusService.handleVehicleStatusMessage(topic, payload);
         } catch (Exception e) {
             log.error("处理MQTT消息失败，主题: {}, 错误: {}", topic, e.getMessage(), e);
+        }
+    }
+    
+    private void handleOnlineStatusMessage(String topic, MqttMessage message) {
+        try {
+            String payload = new String(message.getPayload());
+            log.info("收到在线状态消息，主题: {}, 内容: {}", topic, payload);
+            
+            // 从主题中提取车辆编号
+            String vid = onlineStatusService.extractVidFromTopic(topic);
+            if (vid == null) {
+                log.warn("无法从主题中提取车辆编号: {}", topic);
+                return;
+            }
+            
+            // 解析消息
+            com.citycharge.dto.OnlineStatusMessage statusMsg = onlineStatusService.parseMessage(payload);
+            if (statusMsg == null) {
+                log.error("解析在线状态消息失败，主题: {}", topic);
+                return;
+            }
+            
+            // 处理在线状态
+            onlineStatusService.handleOnlineStatus(vid, statusMsg);
+            
+        } catch (Exception e) {
+            log.error("处理在线状态消息失败，主题: {}, 错误: {}", topic, e.getMessage(), e);
         }
     }
     

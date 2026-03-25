@@ -39,6 +39,12 @@ public class Vehicle {
     @Column(name = "online_status")
     private Boolean onlineStatus = false;
     
+    @Column(name = "last_online_time")
+    private LocalDateTime lastOnlineTime;
+    
+    @Column(name = "ip_address")
+    private String ipAddress;
+    
     @Column(name = "last_update")
     private LocalDateTime lastUpdate;
     
@@ -97,6 +103,12 @@ public class Vehicle {
     
     public Boolean getOnlineStatus() { return onlineStatus; }
     public void setOnlineStatus(Boolean onlineStatus) { this.onlineStatus = onlineStatus; }
+    
+    public LocalDateTime getLastOnlineTime() { return lastOnlineTime; }
+    public void setLastOnlineTime(LocalDateTime lastOnlineTime) { this.lastOnlineTime = lastOnlineTime; }
+    
+    public String getIpAddress() { return ipAddress; }
+    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
     
     public LocalDateTime getLastUpdate() { return lastUpdate; }
     public void setLastUpdate(LocalDateTime lastUpdate) { this.lastUpdate = lastUpdate; }
