@@ -135,6 +135,24 @@ public class VehicleControlService {
     }
     
     /**
+     * 位置设置指令
+     * @param vid 车辆编号
+     * @param x X坐标
+     * @param y Y坐标
+     * @return 发送结果
+     */
+    public boolean setPosition(String vid, double x, double y) {
+        ControlCommand command = new ControlCommand();
+        command.setCommand("setPosition");
+        java.util.Map<String, Object> params = new java.util.HashMap<>();
+        params.put("x", x);
+        params.put("y", y);
+        command.setParams(params);
+        
+        return sendControlCommand(vid, command);
+    }
+    
+    /**
      * 记录操作日志
      */
     private void logOperation(String vid, ControlCommand command) {
@@ -160,6 +178,8 @@ public class VehicleControlService {
                 return validateOnlineStatusParams(command.getParams());
             case "beepHorn":
                 return validateBeepHornParams(command.getParams());
+            case "setPosition":
+                return validateSetPositionParams(command.getParams());
             default:
                 log.warn("未知的控制指令: {}", command.getCommand());
                 return false;
@@ -218,6 +238,43 @@ public class VehicleControlService {
         // 验证间隔参数
         if (interval == null || interval < 100 || interval > 5000) {
             log.warn("无效的间隔时间: {}ms (范围: 100-5000ms)", interval);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private boolean validateSetPositionParams(java.util.Map<String, Object> params) {
+        if (params == null) return false;
+        
+        Double x = null;
+        Double y = null;
+        
+        // 处理不同类型的数值参数
+        Object xObj = params.get("x");
+        Object yObj = params.get("y");
+        
+        if (xObj instanceof Integer) {
+            x = ((Integer) xObj).doubleValue();
+        } else if (xObj instanceof Double) {
+            x = (Double) xObj;
+        }
+        
+        if (yObj instanceof Integer) {
+            y = ((Integer) yObj).doubleValue();
+        } else if (yObj instanceof Double) {
+            y = (Double) yObj;
+        }
+        
+        // 验证坐标参数
+        if (x == null || y == null) {
+            log.warn("位置坐标参数缺失或格式错误");
+            return false;
+        }
+        
+        // 验证坐标范围 (可根据实际地图范围调整)
+        if (x < -180 || x > 180 || y < -90 || y > 90) {
+            log.warn("无效的坐标范围: x={}, y={} (有效范围: x[-180,180], y[-90,90])", x, y);
             return false;
         }
         

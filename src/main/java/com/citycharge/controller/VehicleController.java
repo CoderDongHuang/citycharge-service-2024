@@ -160,6 +160,27 @@ public class VehicleController {
         }
     }
     
+    /**
+     * 位置设置接口
+     */
+    @PostMapping("/{vid}/control/position")
+    public ApiResponse<String> setPosition(@PathVariable String vid, 
+                                         @RequestParam double x,
+                                         @RequestParam double y) {
+        try {
+            boolean success = vehicleControlService.setPosition(vid, x, y);
+            
+            if (success) {
+                return ApiResponse.success("位置设置指令发送成功");
+            } else {
+                return ApiResponse.error("位置设置指令发送失败");
+            }
+            
+        } catch (Exception e) {
+            return ApiResponse.error("位置设置失败: " + e.getMessage());
+        }
+    }
+    
 
     
     @PostMapping("")
