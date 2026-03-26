@@ -1,5 +1,6 @@
 package com.citycharge.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
@@ -15,6 +16,7 @@ public class BatteryAlarmMessage {
      * temperature - 温度异常
      * voltage - 电压异常
      * current - 电流异常
+     * lowBattery - 电量过低
      */
     private String type;
     
@@ -30,6 +32,7 @@ public class BatteryAlarmMessage {
     
     /**
      * 报警级别
+     * critical - 严重
      * high - 高
      * medium - 中
      * low - 低
@@ -39,21 +42,25 @@ public class BatteryAlarmMessage {
     /**
      * 触发值
      */
+    @JsonProperty("trigger_value")
     private Double triggerValue;
     
     /**
      * 阈值
      */
+    @JsonProperty("threshold_value")
     private Double thresholdValue;
     
     /**
      * 位置X坐标
      */
+    @JsonProperty("position_x")
     private Integer positionX;
     
     /**
      * 位置Y坐标
      */
+    @JsonProperty("position_y")
     private Integer positionY;
     
     /**
@@ -73,6 +80,20 @@ public class BatteryAlarmMessage {
      */
     public boolean isVoltageAlarm() {
         return "voltage".equals(type);
+    }
+    
+    /**
+     * 检查是否为电量过低报警
+     */
+    public boolean isLowBatteryAlarm() {
+        return "lowBattery".equals(type);
+    }
+    
+    /**
+     * 检查是否为严重级别报警
+     */
+    public boolean isCriticalLevel() {
+        return "critical".equals(level);
     }
     
     /**

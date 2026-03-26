@@ -148,7 +148,7 @@ system/broadcast
 }
 ```
 
-**电量过低报警**（对应alert_log表字段）：
+**电量过低报警**（对应alert_log表字段）：（完成/2026-3-26）
 ```json
 {
   "timestamp": "2024-01-18T10:39:00Z",

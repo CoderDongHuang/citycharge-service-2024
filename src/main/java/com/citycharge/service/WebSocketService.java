@@ -27,4 +27,8 @@ public class WebSocketService {
     public void sendAlarmNotification(Object alarm) {
         messagingTemplate.convertAndSend("/topic/alarms", alarm);
     }
+    
+    public void sendEmergencyNotification(Object emergencyMsg) {
+        messagingTemplate.convertAndSend("/topic/emergency", emergencyMsg);
+    }
 }
