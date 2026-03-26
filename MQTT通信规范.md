@@ -132,7 +132,7 @@ system/broadcast
 ### 4.3 电池报警消息
 **主题**: `vehicle/{vid}/alarm`
 
-**温度异常报警**（对应alert_log表字段）：
+**温度异常报警**（对应alert_log表字段）：（完成/2026-3-26）
 ```json
 {
   "timestamp": "2024-01-18T10:38:00Z",

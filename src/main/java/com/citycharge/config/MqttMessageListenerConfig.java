@@ -2,6 +2,7 @@ package com.citycharge.config;
 
 import com.citycharge.service.MqttVehicleStatusService;
 import com.citycharge.service.VehicleOnlineStatusService;
+import com.citycharge.service.BatteryAlarmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -22,6 +23,7 @@ public class MqttMessageListenerConfig {
     
     private final MqttVehicleStatusService vehicleStatusService;
     private final VehicleOnlineStatusService onlineStatusService;
+    private final BatteryAlarmService batteryAlarmService;
     private MqttClient mqttClient;
     
     @EventListener(ApplicationReadyEvent.class)
@@ -54,7 +56,13 @@ public class MqttMessageListenerConfig {
                 handleOnlineStatusMessage(topic, message);
             });
             
-            log.info("MQTT订阅成功，主题: {}, {}", vehicleStatusTopic, vehicleOnlineTopic);
+            // 订阅电池报警主题
+            String batteryAlarmTopic = "vehicle/+/alarm";
+            mqttClient.subscribe(batteryAlarmTopic, 1, (topic, message) -> {
+                handleBatteryAlarmMessage(topic, message);
+            });
+            
+            log.info("MQTT订阅成功，主题: {}, {}, {}", vehicleStatusTopic, vehicleOnlineTopic, batteryAlarmTopic);
             
         } catch (Exception e) {
             log.error("MQTT初始化失败: {}", e.getMessage(), e);
@@ -95,6 +103,33 @@ public class MqttMessageListenerConfig {
             
         } catch (Exception e) {
             log.error("处理在线状态消息失败，主题: {}, 错误: {}", topic, e.getMessage(), e);
+        }
+    }
+    
+    private void handleBatteryAlarmMessage(String topic, MqttMessage message) {
+        try {
+            String payload = new String(message.getPayload());
+            log.info("收到电池报警消息，主题: {}, 内容: {}", topic, payload);
+            
+            // 从主题中提取车辆编号
+            String vid = batteryAlarmService.extractVidFromTopic(topic);
+            if (vid == null) {
+                log.warn("无法从主题中提取车辆编号: {}", topic);
+                return;
+            }
+            
+            // 解析消息
+            com.citycharge.dto.BatteryAlarmMessage alarmMsg = batteryAlarmService.parseMessage(payload);
+            if (alarmMsg == null) {
+                log.error("解析电池报警消息失败，主题: {}", topic);
+                return;
+            }
+            
+            // 处理电池报警
+            batteryAlarmService.handleBatteryAlarm(vid, alarmMsg);
+            
+        } catch (Exception e) {
+            log.error("处理电池报警消息失败，主题: {}, 错误: {}", topic, e.getMessage(), e);
         }
     }
     

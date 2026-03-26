@@ -15,6 +15,8 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     
     Optional<Vehicle> findByVid(String vid);
     
+    boolean existsByVid(String vid);
+    
     List<Vehicle> findByOnlineStatusTrue();
     
     @Query("SELECT v FROM Vehicle v WHERE v.lastUpdate < :threshold")
