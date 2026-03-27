@@ -28,25 +28,30 @@ public class DashboardController {
         try {
             DashboardOverview overview = new DashboardOverview();
             
-            // 获取在线车辆数量
+            // 获取总车辆数量
             List<Vehicle> allVehicles = vehicleService.findAll();
+            int totalVehicles = allVehicles.size();
+            
+            // 获取在线车辆数量
             long onlineVehicles = allVehicles.stream()
                     .filter(vehicle -> Boolean.TRUE.equals(vehicle.getOnlineStatus()))
                     .count();
-            overview.setOnlineVehicles((int) onlineVehicles);
             
             // 获取总电池数量（这里需要电池服务，暂时设为固定值）
-            overview.setTotalBatteries(15); // 假设有15个电池
+            int totalBatteries = 15; // 假设有15个电池
             
             // 获取活跃报警数量
             List<AlarmRecord> allAlerts = alarmService.findAll();
             long activeAlerts = allAlerts.stream()
                     .filter(alert -> !Boolean.TRUE.equals(alert.getIsResolved()))
                     .count();
-            overview.setActiveAlerts((int) activeAlerts);
             
-            // 获取换电站数量（暂时设为固定值）
-            overview.setChargingStations(5); // 假设有5个换电站
+            // 设置系统概览字段（与前端文档匹配）
+            overview.setTotalVehicles(totalVehicles);
+            overview.setOnlineVehicles((int) onlineVehicles);
+            overview.setTotalBatteries(totalBatteries);
+            overview.setActiveAlerts((int) activeAlerts);
+            overview.setSystemStatus("normal"); // 系统状态
             
             // 获取最近报警
             List<RecentAlert> recentAlerts = allAlerts.stream()
@@ -84,10 +89,11 @@ public class DashboardController {
     
     @Data
     public static class DashboardOverview {
+        private Integer totalVehicles;
         private Integer onlineVehicles;
         private Integer totalBatteries;
         private Integer activeAlerts;
-        private Integer chargingStations;
+        private String systemStatus;
         private List<RecentAlert> recentAlerts;
         private List<LowBatteryVehicle> lowBatteryVehicles;
     }

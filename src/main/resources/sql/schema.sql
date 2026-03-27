@@ -26,35 +26,30 @@ CREATE TABLE IF NOT EXISTS vehicle (
 CREATE TABLE IF NOT EXISTS battery (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
     pid VARCHAR(50) NOT NULL UNIQUE COMMENT '电池唯一编号',
-    status ENUM('inUse', 'available', 'maintenance') DEFAULT 'available' COMMENT '电池状态',
-    current_vehicle VARCHAR(50) COMMENT '当前使用车辆VID',
+    vid VARCHAR(50) COMMENT '车辆编号',
     voltage DECIMAL(5,2) COMMENT '当前电压(V)',
     temperature DECIMAL(5,2) COMMENT '当前温度(°C)',
-    remaining_capacity DECIMAL(5,2) COMMENT '剩余电量百分比(%)',
-    health DECIMAL(5,2) COMMENT '健康状态百分比(%)',
-    v_min DECIMAL(5,2) DEFAULT 3.0 COMMENT '最小电压阈值',
-    v_max DECIMAL(5,2) DEFAULT 4.2 COMMENT '最大电压阈值',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    battery_level DECIMAL(5,2) COMMENT '电池电量百分比(%)',
+    status VARCHAR(20) DEFAULT 'normal' COMMENT '电池状态(normal/low/overheat/low_voltage)',
+    last_update DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '最后更新时间',
+    created_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     INDEX idx_pid (pid),
-    INDEX idx_status (status),
-    INDEX idx_vehicle (current_vehicle)
+    INDEX idx_vid (vid),
+    INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='电池信息表';
 
 -- 电池历史记录表 - 存储电池使用历史
 CREATE TABLE IF NOT EXISTS battery_history (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
     pid VARCHAR(50) NOT NULL COMMENT '电池编号',
-    vid VARCHAR(50) COMMENT '使用车辆编号',
     voltage DECIMAL(5,2) COMMENT '电压记录(V)',
     temperature DECIMAL(5,2) COMMENT '温度记录(°C)',
-    capacity DECIMAL(5,2) COMMENT '电量记录(%)',
+    battery_level DECIMAL(5,2) COMMENT '电池电量记录(%)',
+    status VARCHAR(20) COMMENT '电池状态',
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '记录时间',
     INDEX idx_pid (pid),
-    INDEX idx_vid (vid),
     INDEX idx_timestamp (timestamp),
-    FOREIGN KEY (pid) REFERENCES battery(pid) ON DELETE CASCADE,
-    FOREIGN KEY (vid) REFERENCES vehicle(vid) ON DELETE SET NULL
+    FOREIGN KEY (pid) REFERENCES battery(pid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='电池历史记录表';
 
 -- 报警记录表 - 存储系统报警信息

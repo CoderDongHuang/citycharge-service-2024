@@ -19,4 +19,6 @@ public interface AlarmRecordRepository extends JpaRepository<AlarmRecord, Long> 
     
     @Query("SELECT a FROM AlarmRecord a WHERE a.vehicleVid = :vid ORDER BY a.alarmTime DESC")
     List<AlarmRecord> findRecentAlarmsByVehicle(@Param("vid") String vid);
+    
+    Long countByIsResolved(Boolean isResolved);
 }

@@ -11,15 +11,11 @@ public class Battery {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "pid", unique = true, nullable = false)
+    @Column(name = "pid", length = 50, unique = true, nullable = false)
     private String pid;
     
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private BatteryStatus status = BatteryStatus.available;
-    
-    @Column(name = "current_vehicle")
-    private String currentVehicle;
+    @Column(name = "vid", length = 50)
+    private String vid;
     
     @Column(name = "voltage", precision = 5, scale = 2)
     private Double voltage;
@@ -27,39 +23,34 @@ public class Battery {
     @Column(name = "temperature", precision = 5, scale = 2)
     private Double temperature;
     
-    @Column(name = "remaining_capacity", precision = 5, scale = 2)
-    private Double remainingCapacity;
+    @Column(name = "battery_level", precision = 5, scale = 2)
+    private Double batteryLevel;
     
-    @Column(name = "health", precision = 5, scale = 2)
-    private Double health;
+    @Column(name = "status", length = 20)
+    private String status;
     
-    @Column(name = "v_min", precision = 5, scale = 2)
-    private Double vMin = 3.0;
+    @Column(name = "last_update")
+    private LocalDateTime lastUpdate;
     
-    @Column(name = "v_max", precision = 5, scale = 2)
-    private Double vMax = 4.2;
-    
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-    
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "created_time")
+    private LocalDateTime createdTime;
     
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        createdTime = LocalDateTime.now();
+        if (lastUpdate == null) {
+            lastUpdate = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = "normal";
+        }
     }
     
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        lastUpdate = LocalDateTime.now();
     }
     
-    public enum BatteryStatus {
-        inUse, available, maintenance
-    }
-
     // Getter and Setter methods
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -67,11 +58,8 @@ public class Battery {
     public String getPid() { return pid; }
     public void setPid(String pid) { this.pid = pid; }
     
-    public BatteryStatus getStatus() { return status; }
-    public void setStatus(BatteryStatus status) { this.status = status; }
-    
-    public String getCurrentVehicle() { return currentVehicle; }
-    public void setCurrentVehicle(String currentVehicle) { this.currentVehicle = currentVehicle; }
+    public String getVid() { return vid; }
+    public void setVid(String vid) { this.vid = vid; }
     
     public Double getVoltage() { return voltage; }
     public void setVoltage(Double voltage) { this.voltage = voltage; }
@@ -79,21 +67,15 @@ public class Battery {
     public Double getTemperature() { return temperature; }
     public void setTemperature(Double temperature) { this.temperature = temperature; }
     
-    public Double getRemainingCapacity() { return remainingCapacity; }
-    public void setRemainingCapacity(Double remainingCapacity) { this.remainingCapacity = remainingCapacity; }
+    public Double getBatteryLevel() { return batteryLevel; }
+    public void setBatteryLevel(Double batteryLevel) { this.batteryLevel = batteryLevel; }
     
-    public Double getHealth() { return health; }
-    public void setHealth(Double health) { this.health = health; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     
-    public Double getVMin() { return vMin; }
-    public void setVMin(Double vMin) { this.vMin = vMin; }
+    public LocalDateTime getLastUpdate() { return lastUpdate; }
+    public void setLastUpdate(LocalDateTime lastUpdate) { this.lastUpdate = lastUpdate; }
     
-    public Double getVMax() { return vMax; }
-    public void setVMax(Double vMax) { this.vMax = vMax; }
-    
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDateTime getCreatedTime() { return createdTime; }
+    public void setCreatedTime(LocalDateTime createdTime) { this.createdTime = createdTime; }
 }

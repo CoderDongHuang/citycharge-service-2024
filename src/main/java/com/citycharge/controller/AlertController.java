@@ -6,6 +6,9 @@ import com.citycharge.entity.AlarmRecord;
 import com.citycharge.service.AlarmService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,24 +20,92 @@ import java.util.stream.Collectors;
 public class AlertController {
     
     private final AlarmService alarmService;
+
+    @GetMapping("/statistics")
+    public ApiResponse<AlertStatistics> getAlertStatistics() {
+        AlertStatistics statistics = new AlertStatistics();
+        statistics.setTotal(alarmService.countAll());
+        statistics.setResolved(alarmService.countByResolved(true));
+        statistics.setUnresolved(alarmService.countByResolved(false));
+        return ApiResponse.success(statistics);
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteAlert(@PathVariable Long id) {
+        try {
+            AlarmRecord alarmRecord = alarmService.findById(id);
+            if (alarmRecord == null) {
+                return ApiResponse.error(404, "报警记录不存在");
+            }
+            alarmService.deleteById(id);
+            return ApiResponse.success("报警删除成功");
+        } catch (Exception e) {
+            return ApiResponse.error("报警删除失败: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<AlertDTO> updateAlert(@PathVariable Long id, @RequestBody AlertUpdateRequest request) {
+        try {
+            AlarmRecord alarmRecord = alarmService.findById(id);
+            if (alarmRecord == null) {
+                return ApiResponse.error(404, "报警记录不存在");
+            }
+            
+            if (request.getType() != null) {
+                alarmRecord.setAlarmType(request.getType());
+            }
+            if (request.getMessage() != null) {
+                alarmRecord.setAlarmMessage(request.getMessage());
+            }
+            if (request.getLevel() != null) {
+                alarmRecord.setAlarmLevel(request.getLevel());
+            }
+            
+            AlarmRecord updatedAlert = alarmService.save(alarmRecord);
+            return ApiResponse.success("报警更新成功", AlertDTO.fromEntity(updatedAlert));
+        } catch (Exception e) {
+            return ApiResponse.error("报警更新失败: " + e.getMessage());
+        }
+    }
+
+    @Data
+    public static class AlertStatistics {
+        private Long total;
+        private Long resolved;
+        private Long unresolved;
+    }
+
+    @Data
+    public static class AlertUpdateRequest {
+        private String type;
+        private String message;
+        private String level;
+    }
     
     @GetMapping("")
-    public ApiResponse<List<AlertDTO>> getAlerts(
+    public ApiResponse<Page<AlertDTO>> getAlerts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) Boolean resolved,
             @RequestParam(required = false) String type) {
         
-        List<AlarmRecord> alerts;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AlarmRecord> alerts;
+        
         if (resolved != null) {
-            alerts = alarmService.findByResolved(resolved);
+            // 这里需要实现分页查询，暂时返回所有数据
+            List<AlarmRecord> alertList = alarmService.findByResolved(resolved);
+            alerts = new org.springframework.data.domain.PageImpl<>(alertList, pageable, alertList.size());
         } else if (type != null && !type.isEmpty()) {
-            alerts = alarmService.findByAlarmType(type);
+            List<AlarmRecord> alertList = alarmService.findByAlarmType(type);
+            alerts = new org.springframework.data.domain.PageImpl<>(alertList, pageable, alertList.size());
         } else {
-            alerts = alarmService.findAll();
+            List<AlarmRecord> alertList = alarmService.findAll();
+            alerts = new org.springframework.data.domain.PageImpl<>(alertList, pageable, alertList.size());
         }
         
-        List<AlertDTO> alertDTOs = alerts.stream()
-                .map(AlertDTO::fromEntity)
-                .collect(Collectors.toList());
+        Page<AlertDTO> alertDTOs = alerts.map(AlertDTO::fromEntity);
         return ApiResponse.success(alertDTOs);
     }
     

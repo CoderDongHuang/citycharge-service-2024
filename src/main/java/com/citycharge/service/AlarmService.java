@@ -38,4 +38,16 @@ public class AlarmService {
     public List<AlarmRecord> findUnresolvedAlarms() {
         return alarmRecordRepository.findByIsResolvedFalse();
     }
+    
+    public Long countAll() {
+        return alarmRecordRepository.count();
+    }
+    
+    public Long countByResolved(Boolean resolved) {
+        return alarmRecordRepository.countByIsResolved(resolved);
+    }
+    
+    public void deleteById(Long id) {
+        alarmRecordRepository.deleteById(id);
+    }
 }

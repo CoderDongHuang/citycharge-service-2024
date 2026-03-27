@@ -17,12 +17,12 @@ public class BatteryDTO {
     public static BatteryDTO fromEntity(Battery battery) {
         BatteryDTO dto = new BatteryDTO();
         dto.setPid(battery.getPid());
-        dto.setStatus(battery.getStatus() != null ? battery.getStatus().name() : "available");
-        dto.setCurrentVehicle(battery.getCurrentVehicle());
+        dto.setStatus(battery.getStatus() != null ? battery.getStatus() : "normal");
+        dto.setCurrentVehicle(battery.getVid());
         dto.setVoltage(battery.getVoltage());
         dto.setTemperature(battery.getTemperature());
-        dto.setRemainingCapacity(battery.getRemainingCapacity());
-        dto.setHealth(battery.getHealth());
+        dto.setRemainingCapacity(battery.getBatteryLevel());
+        dto.setHealth(battery.getBatteryLevel());
         return dto;
     }
     

@@ -1,14 +1,18 @@
 package com.citycharge.controller;
 
 import com.citycharge.common.ApiResponse;
-import com.citycharge.dto.BatteryDTO;
 import com.citycharge.entity.Battery;
+import com.citycharge.entity.BatteryHistory;
 import com.citycharge.service.BatteryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/batteries")
@@ -17,69 +21,114 @@ public class BatteryController {
     
     private final BatteryService batteryService;
     
-    @GetMapping("")
-    public ApiResponse<List<BatteryDTO>> getAllBatteries(@RequestParam(required = false) String status) {
-        List<Battery> batteries;
-        if (status != null && !status.isEmpty()) {
-            batteries = batteryService.findByStatus(Battery.BatteryStatus.valueOf(status));
-        } else {
-            batteries = batteryService.findAll();
-        }
+    /**
+     * 获取电池列表
+     * GET /api/batteries
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<Battery>>> getBatteries(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         
-        List<BatteryDTO> batteryDTOs = batteries.stream()
-                .map(BatteryDTO::fromEntity)
-                .collect(Collectors.toList());
-        return ApiResponse.success(batteryDTOs);
+        try {
+            Page<Battery> batteries = batteryService.getBatteries(page, size);
+            return ResponseEntity.ok(ApiResponse.success("成功", batteries));
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("获取电池列表失败: " + e.getMessage()));
+        }
     }
     
+    /**
+     * 根据电池编号获取电池信息
+     * GET /api/batteries/{pid}
+     */
     @GetMapping("/{pid}")
-    public ApiResponse<BatteryDTO> getBatteryByPid(@PathVariable String pid) {
-        Battery battery = batteryService.findByPid(pid);
-        if (battery == null) {
-            return ApiResponse.error(404, "电池不存在");
-        }
-        return ApiResponse.success(BatteryDTO.fromEntity(battery));
-    }
-    
-    @GetMapping("/{pid}/history")
-    public ApiResponse<List<BatteryDTO.BatteryHistoryDTO>> getBatteryHistory(
-            @PathVariable String pid,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime) {
+    public ResponseEntity<ApiResponse<Battery>> getBattery(@PathVariable String pid) {
         
-        // 这里需要实现电池历史记录的查询逻辑
-        // 目前返回空列表作为示例
-        return ApiResponse.success(java.util.Collections.emptyList());
-    }
-    
-    @PostMapping("")
-    public ApiResponse<BatteryDTO> createBattery(@RequestBody Battery battery) {
         try {
-            Battery savedBattery = batteryService.save(battery);
-            return ApiResponse.success("电池创建成功", BatteryDTO.fromEntity(savedBattery));
+            Optional<Battery> batteryOpt = batteryService.getBatteryByPid(pid);
+            
+            if (batteryOpt.isPresent()) {
+                return ResponseEntity.ok(ApiResponse.success("成功", batteryOpt.get()));
+            } else {
+                return ResponseEntity.status(404)
+                        .body(ApiResponse.error("电池不存在"));
+            }
+            
         } catch (Exception e) {
-            return ApiResponse.error("电池创建失败: " + e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("获取电池信息失败: " + e.getMessage()));
         }
     }
     
-    @PutMapping("/{pid}")
-    public ApiResponse<BatteryDTO> updateBattery(@PathVariable String pid, @RequestBody Battery battery) {
+    /**
+     * 获取电池历史记录
+     * GET /api/batteries/{pid}/history
+     */
+    @GetMapping("/{pid}/history")
+    public ResponseEntity<ApiResponse<List<BatteryHistory>>> getBatteryHistory(
+            @PathVariable String pid,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+            @RequestParam(required = false) Integer limit) {
+        
         try {
-            Battery updatedBattery = batteryService.update(pid, battery);
-            return ApiResponse.success("电池更新成功", BatteryDTO.fromEntity(updatedBattery));
+            // 验证电池是否存在
+            Optional<Battery> batteryOpt = batteryService.getBatteryByPid(pid);
+            if (!batteryOpt.isPresent()) {
+                return ResponseEntity.status(404)
+                        .body(ApiResponse.error("电池不存在"));
+            }
+            
+            // 验证时间范围
+            if (startTime != null && endTime != null && startTime.isAfter(endTime)) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("开始时间不能晚于结束时间"));
+            }
+            
+            // 获取历史记录
+            List<BatteryHistory> history = batteryService.getBatteryHistory(pid, startTime, endTime, limit);
+            return ResponseEntity.ok(ApiResponse.success("成功", history));
+            
         } catch (Exception e) {
-            return ApiResponse.error("电池更新失败: " + e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("获取电池历史记录失败: " + e.getMessage()));
         }
     }
     
-    @DeleteMapping("/{pid}")
-    public ApiResponse<String> deleteBattery(@PathVariable String pid) {
+    /**
+     * 根据车辆编号获取电池列表
+     * GET /api/batteries/vehicle/{vid}
+     */
+    @GetMapping("/vehicle/{vid}")
+    public ResponseEntity<ApiResponse<List<Battery>>> getBatteriesByVehicle(@PathVariable String vid) {
+        
         try {
-            batteryService.deleteByPid(pid);
-            return ApiResponse.success("电池删除成功");
+            List<Battery> batteries = batteryService.getBatteriesByVid(vid);
+            return ResponseEntity.ok(ApiResponse.success("成功", batteries));
+            
         } catch (Exception e) {
-            return ApiResponse.error("电池删除失败: " + e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("获取车辆电池列表失败: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * 获取电池统计信息
+     * GET /api/batteries/statistics
+     */
+    @GetMapping("/statistics")
+    public ResponseEntity<ApiResponse<BatteryService.BatteryStatistics>> getBatteryStatistics() {
+        
+        try {
+            BatteryService.BatteryStatistics statistics = batteryService.getBatteryStatistics();
+            return ResponseEntity.ok(ApiResponse.success("成功", statistics));
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("获取电池统计信息失败: " + e.getMessage()));
         }
     }
 }

@@ -23,6 +23,9 @@ public class AlarmRecord {
     @Column(name = "alarm_message")
     private String alarmMessage;
     
+    @Column(name = "alarm_level")
+    private String alarmLevel;
+    
     @Column(name = "voltage")
     private Double voltage;
     
@@ -67,6 +70,9 @@ public class AlarmRecord {
     
     public String getAlarmMessage() { return alarmMessage; }
     public void setAlarmMessage(String alarmMessage) { this.alarmMessage = alarmMessage; }
+    
+    public String getAlarmLevel() { return alarmLevel; }
+    public void setAlarmLevel(String alarmLevel) { this.alarmLevel = alarmLevel; }
     
     public Double getVoltage() { return voltage; }
     public void setVoltage(Double voltage) { this.voltage = voltage; }

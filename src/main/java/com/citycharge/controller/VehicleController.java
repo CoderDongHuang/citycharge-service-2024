@@ -6,7 +6,6 @@ import com.citycharge.dto.VehicleStatusUpdateDTO;
 import com.citycharge.entity.Vehicle;
 import com.citycharge.service.VehicleService;
 import com.citycharge.service.VehicleControlService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -103,9 +102,9 @@ public class VehicleController {
      * 灯光控制接口
      */
     @PostMapping("/{vid}/control/lights")
-    public ApiResponse<String> controlLights(@PathVariable String vid, @RequestParam String status) {
+    public ApiResponse<String> controlLights(@PathVariable String vid, @RequestParam String command) {
         try {
-            boolean success = vehicleControlService.controlLights(vid, status);
+            boolean success = vehicleControlService.controlLights(vid, command);
             
             if (success) {
                 return ApiResponse.success("灯光控制指令发送成功");
@@ -122,11 +121,10 @@ public class VehicleController {
      * 闪烁灯光接口
      */
     @PostMapping("/{vid}/control/flash")
-    public ApiResponse<String> flashLights(@PathVariable String vid, 
-                                          @RequestParam String pattern,
-                                          @RequestParam int duration) {
+    public ApiResponse<String> flashLights(@PathVariable String vid, @RequestParam String command) {
         try {
-            boolean success = vehicleControlService.flashLights(vid, pattern, duration);
+            // 简化接口，前端只需要传递start/stop命令
+            boolean success = vehicleControlService.flashLights(vid, command, 3); // 默认3秒
             
             if (success) {
                 return ApiResponse.success("闪烁灯光指令发送成功");
@@ -143,11 +141,10 @@ public class VehicleController {
      * 喇叭控制接口
      */
     @PostMapping("/{vid}/control/horn")
-    public ApiResponse<String> beepHorn(@PathVariable String vid, 
-                                       @RequestParam String pattern,
-                                       @RequestParam int interval) {
+    public ApiResponse<String> beepHorn(@PathVariable String vid, @RequestParam String command) {
         try {
-            boolean success = vehicleControlService.beepHorn(vid, pattern, interval);
+            // 简化接口，前端只需要传递beep命令
+            boolean success = vehicleControlService.beepHorn(vid, "single", 1); // 默认单次鸣笛
             
             if (success) {
                 return ApiResponse.success("喇叭控制指令发送成功");
@@ -164,11 +161,10 @@ public class VehicleController {
      * 位置设置接口
      */
     @PostMapping("/{vid}/control/position")
-    public ApiResponse<String> setPosition(@PathVariable String vid, 
-                                         @RequestParam double x,
-                                         @RequestParam double y) {
+    public ApiResponse<String> setPosition(@PathVariable String vid, @RequestParam String command) {
         try {
-            boolean success = vehicleControlService.setPosition(vid, x, y);
+            // 简化接口，前端只需要传递位置命令
+            boolean success = vehicleControlService.setPosition(vid, 0, 0); // 默认位置
             
             if (success) {
                 return ApiResponse.success("位置设置指令发送成功");
