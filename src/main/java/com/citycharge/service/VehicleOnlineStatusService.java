@@ -23,7 +23,6 @@ import java.util.Optional;
 public class VehicleOnlineStatusService {
     
     private final VehicleRepository vehicleRepository;
-    private final WebSocketService webSocketService;
     
     /**
      * 处理车辆在线状态消息
@@ -134,19 +133,8 @@ public class VehicleOnlineStatusService {
                 statusUpdate.put("reason", statusMsg.getReason());
             }
             
-            // 推送到车辆特定的主题
-            webSocketService.sendVehicleStatusUpdate(vid, statusUpdate);
-            
-            // 同时广播到系统主题（可选）
-            Map<String, Object> systemMsg = new HashMap<>();
-            systemMsg.put("type", "vehicle_status_change");
-            systemMsg.put("vid", vid);
-            systemMsg.put("status", statusMsg.getStatus());
-            systemMsg.put("timestamp", LocalDateTime.now().toString());
-            
-            webSocketService.broadcastSystemMessage(systemMsg);
-            
-            log.debug("已推送状态更新到前端 - 车辆: {}, 状态: {}", vid, statusMsg.getStatus());
+            // 暂时不推送 WebSocket，等待后续实现
+            log.debug("车辆状态更新 - 车辆：{}, 状态：{}", vid, statusMsg.getStatus());
             
         } catch (Exception e) {
             log.error("推送状态更新到前端失败: {}", e.getMessage());

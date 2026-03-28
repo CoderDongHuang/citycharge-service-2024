@@ -50,6 +50,15 @@ public class AlarmRecord {
     @Column(name = "resolve_time")
     private LocalDateTime resolveTime;
     
+    @Column(name = "handled_by")
+    private String handledBy;
+    
+    @Column(name = "handled_at")
+    private LocalDateTime handledAt;
+    
+    @Column(name = "resolve_notes")
+    private String resolveNotes;
+    
     @PrePersist
     protected void onCreate() {
         alarmTime = LocalDateTime.now();
@@ -97,4 +106,13 @@ public class AlarmRecord {
     
     public LocalDateTime getResolveTime() { return resolveTime; }
     public void setResolveTime(LocalDateTime resolveTime) { this.resolveTime = resolveTime; }
+    
+    public String getHandledBy() { return handledBy; }
+    public void setHandledBy(String handledBy) { this.handledBy = handledBy; }
+    
+    public LocalDateTime getHandledAt() { return handledAt; }
+    public void setHandledAt(LocalDateTime handledAt) { this.handledAt = handledAt; }
+    
+    public String getResolveNotes() { return resolveNotes; }
+    public void setResolveNotes(String resolveNotes) { this.resolveNotes = resolveNotes; }
 }

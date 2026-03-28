@@ -41,15 +41,36 @@ public class AlertLog {
     @Column(name = "message", columnDefinition = "TEXT")
     private String message;
     
+    @Column(name = "resolved")
+    private Boolean resolved = false;
+    
+    @Column(name = "resolved_by", length = 50)
+    private String resolvedBy;
+    
+    @Column(name = "resolved_at")
+    private LocalDateTime resolvedAt;
+    
+    @Column(name = "resolved_note", columnDefinition = "TEXT")
+    private String resolvedNote;
+    
     @Column(name = "created_time")
     private LocalDateTime createdTime;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
     
     @PrePersist
     protected void onCreate() {
         createdTime = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
         if (timestamp == null) {
             timestamp = LocalDateTime.now();
         }
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
     
     // Getter and Setter methods
@@ -88,4 +109,19 @@ public class AlertLog {
     
     public LocalDateTime getCreatedTime() { return createdTime; }
     public void setCreatedTime(LocalDateTime createdTime) { this.createdTime = createdTime; }
+    
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public Boolean getResolved() { return resolved; }
+    public void setResolved(Boolean resolved) { this.resolved = resolved; }
+    
+    public String getResolvedBy() { return resolvedBy; }
+    public void setResolvedBy(String resolvedBy) { this.resolvedBy = resolvedBy; }
+    
+    public LocalDateTime getResolvedAt() { return resolvedAt; }
+    public void setResolvedAt(LocalDateTime resolvedAt) { this.resolvedAt = resolvedAt; }
+    
+    public String getResolvedNote() { return resolvedNote; }
+    public void setResolvedNote(String resolvedNote) { this.resolvedNote = resolvedNote; }
 }

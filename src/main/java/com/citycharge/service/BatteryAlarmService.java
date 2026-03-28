@@ -23,7 +23,6 @@ public class BatteryAlarmService {
     
     private final VehicleRepository vehicleRepository;
     private final AlertLogRepository alertLogRepository;
-    private final WebSocketService webSocketService;
     
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
     
@@ -151,20 +150,8 @@ public class BatteryAlarmService {
             alarmNotification.put("message", alarmMsg.getMessage());
             alarmNotification.put("timestamp", alarmMsg.getTimestamp());
             
-            // 推送到车辆特定的主题
-            webSocketService.sendAlarmNotification(alarmNotification);
-            
-            // 同时广播到系统主题
-            Map<String, Object> systemMsg = new HashMap<>();
-            systemMsg.put("type", "alarm_notification");
-            systemMsg.put("vid", alarmMsg.getVid());
-            systemMsg.put("alarmType", alarmMsg.getType());
-            systemMsg.put("level", alarmMsg.getLevel());
-            systemMsg.put("timestamp", LocalDateTime.now().toString());
-            
-            webSocketService.broadcastSystemMessage(systemMsg);
-            
-            log.debug("已推送报警通知到前端 - 车辆: {}, 类型: {}, 级别: {}", 
+            // 暂时不推送 WebSocket，等待后续实现
+            log.debug("收到报警通知 - 车辆：{}, 类型：{}, 级别：{}", 
                     alarmMsg.getVid(), alarmMsg.getType(), alarmMsg.getLevel());
             
         } catch (Exception e) {
@@ -264,10 +251,9 @@ public class BatteryAlarmService {
             emergencyMsg.put("message", "电量严重不足，请立即处理！");
             emergencyMsg.put("timestamp", LocalDateTime.now().toString());
             
-            // 推送到紧急通知频道
-            webSocketService.sendEmergencyNotification(emergencyMsg);
+            // 暂时不推送 WebSocket，等待后续实现
             
-            log.info("已发送紧急通知 - 车辆: {}, 电量: {}%", vid, alarmMsg.getTriggerValue());
+            log.info("检测到紧急低电量 - 车辆：{}, 电量：{}%", vid, alarmMsg.getTriggerValue());
             
         } catch (Exception e) {
             log.error("发送紧急通知失败: {}", e.getMessage());
