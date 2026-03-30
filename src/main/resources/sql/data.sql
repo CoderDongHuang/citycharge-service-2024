@@ -54,42 +54,27 @@ INSERT INTO vehicle (id, vid, pid, voltage, temperature, battery_level, light_st
 (12, 'V012', 'B012', 46.8, 27.2, 45.0, 'highBeam', 30, 35, 0, NOW(), NOW(), NOW());
 
 -- 插入电池历史数据
-INSERT INTO battery_history (id, pid, voltage, temperature, battery_level, status, timestamp) VALUES
-(1, 'B001', 48.5, 25.0, 85.0, 'normal', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
-(2, 'B001', 48.3, 25.5, 84.5, 'normal', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
-(3, 'B001', 48.1, 26.0, 84.0, 'normal', DATE_SUB(NOW(), INTERVAL 15 MINUTE)),
-(4, 'B002', 46.3, 28.0, 65.0, 'normal', DATE_SUB(NOW(), INTERVAL 45 MINUTE)),
-(5, 'B002', 46.1, 28.5, 64.0, 'normal', DATE_SUB(NOW(), INTERVAL 15 MINUTE)),
-(6, 'B002', 45.9, 29.0, 63.5, 'normal', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
-(7, 'B003', 49.2, 22.0, 92.0, 'normal', DATE_SUB(NOW(), INTERVAL 20 MINUTE)),
-(8, 'B003', 49.0, 22.5, 91.5, 'normal', DATE_SUB(NOW(), INTERVAL 10 MINUTE)),
-(9, 'B004', 50.1, 24.0, 95.0, 'normal', DATE_SUB(NOW(), INTERVAL 40 MINUTE)),
-(10, 'B005', 45.8, 26.0, 55.0, 'normal', DATE_SUB(NOW(), INTERVAL 35 MINUTE)),
-(11, 'B006', 42.5, 30.0, 35.0, 'low', DATE_SUB(NOW(), INTERVAL 10 MINUTE)),
-(12, 'B006', 42.3, 30.5, 34.5, 'low', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
-(13, 'B007', 51.2, 65.5, 80.0, 'overheat', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
-(14, 'B008', 2.8, 25.0, 60.0, 'low_voltage', DATE_SUB(NOW(), INTERVAL 2 MINUTE)),
-(15, 'B009', 47.8, 26.5, 78.0, 'normal', DATE_SUB(NOW(), INTERVAL 25 MINUTE)),
-(16, 'B010', 49.5, 23.5, 88.0, 'normal', DATE_SUB(NOW(), INTERVAL 20 MINUTE)),
-(17, 'B011', 48.2, 24.8, 82.0, 'normal', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
-(18, 'B012', 46.8, 27.2, 45.0, 'low', DATE_SUB(NOW(), INTERVAL 15 MINUTE)),
-(19, 'B013', 50.5, 62.0, 75.0, 'overheat', DATE_SUB(NOW(), INTERVAL 8 MINUTE)),
-(20, 'B014', 3.2, 26.0, 68.0, 'low_voltage', DATE_SUB(NOW(), INTERVAL 3 MINUTE));
-
--- 插入报警记录数据
-INSERT INTO alarm_records (id, alarm_type, vehicle_vid, battery_pid, alarm_message, voltage, temperature, capacity_percentage, position_x, position_y, is_resolved, alarm_time, resolve_time, created_at) VALUES
-(1, 'lowBattery', 'V002', 'B002', '电池电量过低', 46.3, 28.0, 65.0, 25, 30, 0, DATE_SUB(NOW(), INTERVAL 2 HOUR), NULL, NOW()),
-(2, 'temperature', 'V001', 'B001', '电池温度过高', 48.5, 65.5, 85.0, 10, 15, 1, DATE_SUB(NOW(), INTERVAL 1 HOUR), DATE_SUB(NOW(), INTERVAL 30 MINUTE), NOW()),
-(3, 'unreachable', 'V003', 'B003', '车辆无法连接', 49.2, 22.0, 92.0, 40, 45, 0, DATE_SUB(NOW(), INTERVAL 3 HOUR), NULL, NOW()),
-(4, 'lowBattery', 'V006', 'B006', '电池电量严重不足', 42.5, 30.0, 35.0, 20, 25, 0, DATE_SUB(NOW(), INTERVAL 4 HOUR), NULL, NOW()),
-(5, 'temperature', 'V007', 'B007', '电池温度异常升高', 51.2, 65.5, 80.0, 35, 40, 0, DATE_SUB(NOW(), INTERVAL 2 HOUR), NULL, NOW()),
-(6, 'lowVoltage', 'V008', 'B008', '电池电压过低', 2.8, 25.0, 60.0, 50, 55, 1, DATE_SUB(NOW(), INTERVAL 5 HOUR), DATE_SUB(NOW(), INTERVAL 1 HOUR), NOW()),
-(7, 'unreachable', 'V010', 'B010', '车辆长时间离线', 49.5, 23.5, 88.0, 80, 85, 0, DATE_SUB(NOW(), INTERVAL 6 HOUR), NULL, NOW()),
-(8, 'lowBattery', 'V004', 'B004', '电池电量下降', 50.1, 24.0, 95.0, 60, 70, 1, DATE_SUB(NOW(), INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR), NOW()),
-(9, 'temperature', 'V009', 'B009', '电池温度偏高', 47.8, 26.5, 78.0, 65, 70, 0, DATE_SUB(NOW(), INTERVAL 1 HOUR), NULL, NOW()),
-(10, 'lowBattery', 'V010', 'B012', '备用电池电量低', 46.8, 27.2, 45.0, 30, 35, 0, DATE_SUB(NOW(), INTERVAL 7 HOUR), NULL, NOW()),
-(11, 'temperature', 'V011', 'B013', '备用电池过热', 50.5, 62.0, 75.0, 40, 45, 0, DATE_SUB(NOW(), INTERVAL 8 HOUR), NULL, NOW()),
-(12, 'lowVoltage', 'V012', 'B014', '备用电池电压异常', 3.2, 26.0, 68.0, 55, 60, 0, DATE_SUB(NOW(), INTERVAL 9 HOUR), NULL, NOW());
+INSERT INTO battery_history (id, pid, vid, voltage, temperature, battery_level, status, timestamp) VALUES
+(1, 'V001', 'B001', 48.5, 25.0, 85.0, 'normal', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+(2, 'V001', 'B001', 48.3, 25.5, 84.5, 'normal', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
+(3, 'V001', 'B001', 48.1, 26.0, 84.0, 'normal', DATE_SUB(NOW(), INTERVAL 15 MINUTE)),
+(4, 'V002', 'B002', 46.3, 28.0, 65.0, 'normal', DATE_SUB(NOW(), INTERVAL 45 MINUTE)),
+(5, 'V002', 'B002', 46.1, 28.5, 64.0, 'normal', DATE_SUB(NOW(), INTERVAL 15 MINUTE)),
+(6, 'V002', 'B002', 45.9, 29.0, 63.5, 'normal', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
+(7, 'V003', 'B003', 49.2, 22.0, 92.0, 'normal', DATE_SUB(NOW(), INTERVAL 20 MINUTE)),
+(8, 'V003', 'B003', 49.0, 22.5, 91.5, 'normal', DATE_SUB(NOW(), INTERVAL 10 MINUTE)),
+(9, 'V004', 'B004', 50.1, 24.0, 95.0, 'normal', DATE_SUB(NOW(), INTERVAL 40 MINUTE)),
+(10, 'V005', 'B005', 45.8, 26.0, 55.0, 'normal', DATE_SUB(NOW(), INTERVAL 35 MINUTE)),
+(11, 'V006', 'B006', 42.5, 30.0, 35.0, 'low', DATE_SUB(NOW(), INTERVAL 10 MINUTE)),
+(12, 'V006', 'B006', 42.3, 30.5, 34.5, 'low', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
+(13, 'V007', 'B007', 51.2, 65.5, 80.0, 'overheat', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
+(14, 'V008', 'B008', 2.8, 25.0, 60.0, 'low_voltage', DATE_SUB(NOW(), INTERVAL 2 MINUTE)),
+(15, 'V009', 'B009', 47.8, 26.5, 78.0, 'normal', DATE_SUB(NOW(), INTERVAL 25 MINUTE)),
+(16, 'V010', 'B010', 49.5, 23.5, 88.0, 'normal', DATE_SUB(NOW(), INTERVAL 20 MINUTE)),
+(17, 'V011', 'B011', 48.2, 24.8, 82.0, 'normal', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
+(18, 'V012', 'B012', 46.8, 27.2, 45.0, 'low', DATE_SUB(NOW(), INTERVAL 15 MINUTE)),
+(19, 'V013', 'B013', 50.5, 62.0, 75.0, 'overheat', DATE_SUB(NOW(), INTERVAL 8 MINUTE)),
+(20, 'V014', 'B014', 3.2, 26.0, 68.0, 'low_voltage', DATE_SUB(NOW(), INTERVAL 3 MINUTE));
 
 -- 插入报警日志数据
 INSERT INTO alert_log (id, type, vid, pid, message, level, resolved, resolved_by, resolved_at, resolved_note, trigger_value, threshold_value, position_x, position_y, timestamp, created_at, updated_at) VALUES

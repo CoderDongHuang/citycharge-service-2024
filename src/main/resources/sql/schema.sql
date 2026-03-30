@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS battery (
 CREATE TABLE IF NOT EXISTS battery_history (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
     pid VARCHAR(50) NOT NULL COMMENT '电池编号',
+    vid VARCHAR(50) NOT NULL COMMENT '关联车辆编号',
     voltage DECIMAL(5,2) COMMENT '电压记录(V)',
     temperature DECIMAL(5,2) COMMENT '温度记录(°C)',
     battery_level DECIMAL(5,2) COMMENT '电池电量记录(%)',
@@ -51,30 +52,6 @@ CREATE TABLE IF NOT EXISTS battery_history (
     INDEX idx_timestamp (timestamp),
     FOREIGN KEY (pid) REFERENCES battery(pid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='电池历史记录表';
-
--- 报警记录表 - 存储系统报警信息
-CREATE TABLE IF NOT EXISTS alarm_records (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
-    alarm_type VARCHAR(50) NOT NULL COMMENT '报警类型',
-    vehicle_vid VARCHAR(50) COMMENT '关联车辆VID',
-    battery_pid VARCHAR(50) COMMENT '关联电池PID',
-    alarm_message VARCHAR(255) COMMENT '报警信息',
-    voltage DECIMAL(5,2) COMMENT '电压值(V)',
-    temperature DECIMAL(5,2) COMMENT '温度值(°C)',
-    capacity_percentage DECIMAL(5,2) COMMENT '电量百分比(%)',
-    position_x INT COMMENT '报警位置X坐标',
-    position_y INT COMMENT '报警位置Y坐标',
-    is_resolved TINYINT(1) DEFAULT 0 COMMENT '是否已解决(0:未解决,1:已解决)',
-    alarm_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '报警时间',
-    resolve_time DATETIME COMMENT '解决时间',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    INDEX idx_vehicle (vehicle_vid),
-    INDEX idx_battery (battery_pid),
-    INDEX idx_resolved (is_resolved),
-    INDEX idx_time (alarm_time),
-    FOREIGN KEY (vehicle_vid) REFERENCES vehicle(vid) ON DELETE SET NULL,
-    FOREIGN KEY (battery_pid) REFERENCES battery(pid) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报警记录表';
 
 -- 报警日志表 - 存储系统报警信息（新增表）
 CREATE TABLE IF NOT EXISTS alert_log (
