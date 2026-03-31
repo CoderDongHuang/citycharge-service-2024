@@ -1,7 +1,9 @@
 package com.citycharge.service;
 
 import com.citycharge.dto.VehicleStatusMessage;
+import com.citycharge.entity.Battery;
 import com.citycharge.entity.Vehicle;
+import com.citycharge.repository.BatteryRepository;
 import com.citycharge.repository.VehicleRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 public class MqttVehicleStatusService {
     
     private final VehicleRepository vehicleRepository;
+    private final BatteryRepository batteryRepository;
     private final ObjectMapper objectMapper;
     
     /**
@@ -53,7 +56,6 @@ public class MqttVehicleStatusService {
     private void processVehicleStatus(VehicleStatusMessage statusMessage) {
         String vid = statusMessage.getVid();
         
-        // 查找或创建车辆记录
         Vehicle vehicle = vehicleRepository.findByVid(vid)
                 .orElseGet(() -> {
                     Vehicle newVehicle = new Vehicle();
@@ -62,11 +64,12 @@ public class MqttVehicleStatusService {
                     return newVehicle;
                 });
         
-        // 更新车辆状态信息
         updateVehicleFields(vehicle, statusMessage);
-        
-        // 保存到数据库
         vehicleRepository.save(vehicle);
+        
+        if (statusMessage.getPid() != null && !statusMessage.getPid().isEmpty()) {
+            updateBatteryStatus(statusMessage);
+        }
         
         log.debug("车辆状态更新成功: {}", vid);
     }
@@ -111,5 +114,54 @@ public class MqttVehicleStatusService {
         }
         
         vehicle.setUpdatedAt(LocalDateTime.now());
+    }
+    
+    /**
+     * 更新电池状态
+     */
+    private void updateBatteryStatus(VehicleStatusMessage statusMessage) {
+        String pid = statusMessage.getPid();
+        
+        Battery battery = batteryRepository.findByPid(pid)
+                .orElseGet(() -> {
+                    Battery newBattery = new Battery();
+                    newBattery.setPid(pid);
+                    newBattery.setCreatedTime(LocalDateTime.now());
+                    return newBattery;
+                });
+        
+        battery.setVid(statusMessage.getVid());
+        battery.setVoltage(statusMessage.getVoltage());
+        battery.setTemperature(statusMessage.getTemperature());
+        battery.setBatteryLevel(statusMessage.getBatteryLevel());
+        battery.setStatus(calculateBatteryStatus(statusMessage));
+        battery.setLastUpdate(LocalDateTime.now());
+        
+        batteryRepository.save(battery);
+        log.debug("电池状态更新成功: {}", pid);
+    }
+    
+    /**
+     * 计算电池状态
+     * 状态判断优先级: overheat > low_voltage > low > normal
+     */
+    private String calculateBatteryStatus(VehicleStatusMessage statusMessage) {
+        Double temperature = statusMessage.getTemperature();
+        Double voltage = statusMessage.getVoltage();
+        Double batteryLevel = statusMessage.getBatteryLevel();
+        
+        if (temperature != null && temperature > 60.0) {
+            return "overheat";
+        }
+        
+        if (voltage != null && voltage < 3.0) {
+            return "low_voltage";
+        }
+        
+        if (batteryLevel != null && batteryLevel < 20.0) {
+            return "low";
+        }
+        
+        return "normal";
     }
 }
