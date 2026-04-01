@@ -8,19 +8,6 @@
 -- DELETE FROM vehicle;
 -- DELETE FROM charging_stations;
 
--- 插入充电站数据
-INSERT INTO charging_stations (id, station_id, position_x, position_y, available_batteries, total_capacity, is_active) VALUES
-(1, 'CS001', 50, 50, 3, 5, 1),
-(2, 'CS002', 80, 20, 2, 4, 1),
-(3, 'CS003', 20, 80, 4, 6, 1),
-(4, 'CS004', 50, 90, 1, 3, 0),
-(5, 'CS005', 50, 10, 5, 5, 1),
-(6, 'CS006', 30, 30, 6, 8, 1),
-(7, 'CS007', 70, 70, 4, 6, 1),
-(8, 'CS008', 10, 90, 2, 4, 0),
-(9, 'CS009', 90, 10, 7, 10, 1),
-(10, 'CS010', 40, 60, 3, 5, 1);
-
 -- 插入电池数据
 INSERT INTO battery (id, pid, vid, voltage, temperature, battery_level, status, last_update, created_time) VALUES
 (1, 'B001', 'V001', 48.5, 25.0, 85.0, 'normal', NOW(), NOW()),
@@ -52,29 +39,6 @@ INSERT INTO vehicle (id, vid, pid, voltage, temperature, battery_level, light_st
 (10, 'V010', 'B010', 49.5, 23.5, 88.0, 'lowBeam', 80, 85, 0, NOW(), NOW(), NOW()),
 (11, 'V011', 'B011', 48.2, 24.8, 82.0, 'off', 15, 20, 0, NOW(), NOW(), NOW()),
 (12, 'V012', 'B012', 46.8, 27.2, 45.0, 'highBeam', 30, 35, 0, NOW(), NOW(), NOW());
-
--- 插入电池历史数据
-INSERT INTO battery_history (id, pid, vid, voltage, temperature, battery_level, status, timestamp) VALUES
-(1, 'V001', 'B001', 48.5, 25.0, 85.0, 'normal', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
-(2, 'V001', 'B001', 48.3, 25.5, 84.5, 'normal', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
-(3, 'V001', 'B001', 48.1, 26.0, 84.0, 'normal', DATE_SUB(NOW(), INTERVAL 15 MINUTE)),
-(4, 'V002', 'B002', 46.3, 28.0, 65.0, 'normal', DATE_SUB(NOW(), INTERVAL 45 MINUTE)),
-(5, 'V002', 'B002', 46.1, 28.5, 64.0, 'normal', DATE_SUB(NOW(), INTERVAL 15 MINUTE)),
-(6, 'V002', 'B002', 45.9, 29.0, 63.5, 'normal', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
-(7, 'V003', 'B003', 49.2, 22.0, 92.0, 'normal', DATE_SUB(NOW(), INTERVAL 20 MINUTE)),
-(8, 'V003', 'B003', 49.0, 22.5, 91.5, 'normal', DATE_SUB(NOW(), INTERVAL 10 MINUTE)),
-(9, 'V004', 'B004', 50.1, 24.0, 95.0, 'normal', DATE_SUB(NOW(), INTERVAL 40 MINUTE)),
-(10, 'V005', 'B005', 45.8, 26.0, 55.0, 'normal', DATE_SUB(NOW(), INTERVAL 35 MINUTE)),
-(11, 'V006', 'B006', 42.5, 30.0, 35.0, 'low', DATE_SUB(NOW(), INTERVAL 10 MINUTE)),
-(12, 'V006', 'B006', 42.3, 30.5, 34.5, 'low', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
-(13, 'V007', 'B007', 51.2, 65.5, 80.0, 'overheat', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
-(14, 'V008', 'B008', 2.8, 25.0, 60.0, 'low_voltage', DATE_SUB(NOW(), INTERVAL 2 MINUTE)),
-(15, 'V009', 'B009', 47.8, 26.5, 78.0, 'normal', DATE_SUB(NOW(), INTERVAL 25 MINUTE)),
-(16, 'V010', 'B010', 49.5, 23.5, 88.0, 'normal', DATE_SUB(NOW(), INTERVAL 20 MINUTE)),
-(17, 'V011', 'B011', 48.2, 24.8, 82.0, 'normal', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
-(18, 'V012', 'B012', 46.8, 27.2, 45.0, 'low', DATE_SUB(NOW(), INTERVAL 15 MINUTE)),
-(19, 'V013', 'B013', 50.5, 62.0, 75.0, 'overheat', DATE_SUB(NOW(), INTERVAL 8 MINUTE)),
-(20, 'V014', 'B014', 3.2, 26.0, 68.0, 'low_voltage', DATE_SUB(NOW(), INTERVAL 3 MINUTE));
 
 -- 插入报警日志数据
 INSERT INTO alert_log (id, type, vid, pid, message, level, resolved, resolved_by, resolved_at, resolved_note, trigger_value, threshold_value, position_x, position_y, timestamp, created_at, updated_at) VALUES

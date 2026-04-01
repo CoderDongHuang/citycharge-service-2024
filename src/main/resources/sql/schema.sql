@@ -38,21 +38,6 @@ CREATE TABLE IF NOT EXISTS battery (
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='电池信息表';
 
--- 电池历史记录表 - 存储电池使用历史
-CREATE TABLE IF NOT EXISTS battery_history (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
-    pid VARCHAR(50) NOT NULL COMMENT '电池编号',
-    vid VARCHAR(50) NOT NULL COMMENT '关联车辆编号',
-    voltage DECIMAL(5,2) COMMENT '电压记录(V)',
-    temperature DECIMAL(5,2) COMMENT '温度记录(°C)',
-    battery_level DECIMAL(5,2) COMMENT '电池电量记录(%)',
-    status VARCHAR(20) COMMENT '电池状态',
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '记录时间',
-    INDEX idx_pid (pid),
-    INDEX idx_timestamp (timestamp),
-    FOREIGN KEY (pid) REFERENCES battery(pid) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='电池历史记录表';
-
 -- 报警日志表 - 存储系统报警信息（新增表）
 CREATE TABLE IF NOT EXISTS alert_log (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
@@ -124,17 +109,3 @@ CREATE TABLE IF NOT EXISTS station (
     INDEX idx_position (position_x, position_y),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='换电站信息表';
-
--- 充电站表 - 存储充电站信息
-CREATE TABLE IF NOT EXISTS charging_stations (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
-    station_id VARCHAR(50) NOT NULL UNIQUE COMMENT '充电站编号',
-    position_x INT NOT NULL COMMENT 'X坐标',
-    position_y INT NOT NULL COMMENT 'Y坐标',
-    available_batteries INT DEFAULT 0 COMMENT '可用电池数量',
-    total_capacity INT DEFAULT 10 COMMENT '总容量',
-    is_active TINYINT(1) DEFAULT 1 COMMENT '是否激活(0:否,1:是)',
-    INDEX idx_station_id (station_id),
-    INDEX idx_position (position_x, position_y),
-    INDEX idx_active (is_active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='充电站信息表';
