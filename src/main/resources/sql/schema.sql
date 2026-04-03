@@ -109,3 +109,20 @@ CREATE TABLE IF NOT EXISTS station (
     INDEX idx_position (position_x, position_y),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='换电站信息表';
+
+-- 用户表 - 存储用户账号信息
+CREATE TABLE IF NOT EXISTS user (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
+    password VARCHAR(255) NOT NULL COMMENT '密码（MD5加密）',
+    email VARCHAR(100) COMMENT '邮箱',
+    role VARCHAR(20) DEFAULT 'user' COMMENT '角色（admin/operator/user）',
+    avatar VARCHAR(255) COMMENT '头像URL',
+    status INT DEFAULT 1 COMMENT '状态（1:正常 0:禁用）',
+    last_login DATETIME COMMENT '最后登录时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_username (username),
+    INDEX idx_email (email),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户信息表';

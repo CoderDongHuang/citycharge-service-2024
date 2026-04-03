@@ -64,6 +64,11 @@ citycharge:
   notification:
     charging-station-threshold: 0.3
 
+# JWT配置
+jwt:
+  secret: citycharge-secret-key-for-jwt-token-generation-2024
+  expiration: 86400000
+
 # 日志配置
 logging:
   level:

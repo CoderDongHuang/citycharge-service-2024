@@ -79,6 +79,12 @@ INSERT INTO station (id, station_id, name, position_x, position_y, address, batt
 (9, 'ST009', '工业园换电站', 40, 60, '工业园A区77号', 20, 16, 'active', '06:30-22:30', '13800138009', '郑技术员', NOW(), NOW()),
 (10, 'ST010', '商业中心换电站', 60, 20, '商业中心B座99号', 24, 20, 'active', '08:00-21:00', '13800138010', '钱主任', NOW(), NOW());
 
+-- 插入用户数据（密码为 123456 的加密值）
+INSERT INTO user (id, username, password, email, role, avatar, status, last_login, created_at, updated_at) VALUES
+(1, 'admin', 'e10adc3949ba59abbe56e057f20f883e', 'admin@citycharge.com', 'admin', NULL, 1, NULL, NOW(), NOW()),
+(2, 'operator', 'e10adc3949ba59abbe56e057f20f883e', 'operator@citycharge.com', 'operator', NULL, 1, NULL, NOW(), NOW()),
+(3, 'user', 'e10adc3949ba59abbe56e057f20f883e', 'user@citycharge.com', 'user', NULL, 1, NULL, NOW(), NOW());
+
 -- 数据验证查询（可选）
 -- SELECT '车辆数据:' AS info, COUNT(*) AS count FROM vehicle
 -- UNION ALL
