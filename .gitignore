@@ -22,7 +22,8 @@ Thumbs.db
 
 # Application properties with sensitive data
 application-*.properties
-!application.yml
+application.yml
+!application.yml.example
 
 # Build outputs
 build/

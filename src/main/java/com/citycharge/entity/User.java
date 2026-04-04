@@ -14,11 +14,17 @@ public class User {
     @Column(name = "username", unique = true, nullable = false, length = 50)
     private String username;
     
-    @Column(name = "password", nullable = false, length = 255)
+    @Column(name = "password", length = 255)
     private String password;
     
     @Column(name = "email", length = 100)
     private String email;
+    
+    @Column(name = "github_id", length = 50)
+    private String githubId;
+    
+    @Column(name = "provider", length = 20)
+    private String provider = "local";
     
     @Column(name = "role", length = 20)
     private String role = "user";
@@ -66,6 +72,12 @@ public class User {
     
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    
+    public String getGithubId() { return githubId; }
+    public void setGithubId(String githubId) { this.githubId = githubId; }
+    
+    public String getProvider() { return provider; }
+    public void setProvider(String provider) { this.provider = provider; }
     
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
