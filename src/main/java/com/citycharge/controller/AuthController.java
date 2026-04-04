@@ -160,15 +160,31 @@ public class AuthController {
                 return ApiResponse.error("用户名不能为空");
             }
             
+            if (username.length() < 3 || username.length() > 20) {
+                return ApiResponse.error("用户名长度必须在 3-20 之间");
+            }
+            
             if (password == null || password.isEmpty()) {
                 return ApiResponse.error("密码不能为空");
+            }
+            
+            if (password.length() < 6 || password.length() > 20) {
+                return ApiResponse.error("密码长度必须在 6-20 之间");
+            }
+            
+            if (email == null || email.isEmpty()) {
+                return ApiResponse.error("邮箱不能为空");
+            }
+            
+            if (!isValidEmail(email)) {
+                return ApiResponse.error("邮箱格式不正确");
             }
             
             if (userRepository.existsByUsername(username)) {
                 return ApiResponse.error("用户名已存在");
             }
             
-            if (email != null && !email.isEmpty() && userRepository.existsByEmail(email)) {
+            if (userRepository.existsByEmail(email)) {
                 return ApiResponse.error("邮箱已被注册");
             }
             
@@ -195,6 +211,14 @@ public class AuthController {
         } catch (Exception e) {
             return ApiResponse.error("注册失败：" + e.getMessage());
         }
+    }
+    
+    private boolean isValidEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return false;
+        }
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        return email.matches(emailRegex);
     }
     
     private String extractToken(String authHeader) {
