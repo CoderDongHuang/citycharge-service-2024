@@ -73,6 +73,12 @@ github:
     redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:8080/auth/github/callback}
     frontend-redirect: ${FRONTEND_REDIRECT:http://localhost:5173/dashboard}
 
+deepseek:
+  api-key: ${DEEPSEEK_API_KEY:your-deepseek-api-key}
+  model: ${DEEPSEEK_MODEL:deepseek-chat}
+  max-tokens: ${DEEPSEEK_MAX_TOKENS:2000}
+  temperature: ${DEEPSEEK_TEMPERATURE:0.7}
+
 # 日志配置
 logging:
   level:
