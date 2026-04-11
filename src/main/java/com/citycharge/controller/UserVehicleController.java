@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/vehicles")
+@RequestMapping("/user/vehicles")
 @RequiredArgsConstructor
 public class UserVehicleController {
     
@@ -24,8 +24,9 @@ public class UserVehicleController {
     
     @GetMapping
     public ApiResponse<List<UserVehicleDTO>> getVehicles(
-            @RequestHeader("Authorization") String authHeader) {
-        Long userId = extractUserId(authHeader);
+            @RequestHeader(value = "X-User-ID", required = false) Long xUserId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Long userId = extractUserId(xUserId, authHeader);
         if (userId == null) {
             return ApiResponse.error(401, "未授权访问");
         }
@@ -41,8 +42,9 @@ public class UserVehicleController {
     @GetMapping("/{vehicleId}")
     public ApiResponse<UserVehicleDTO> getVehicle(
             @PathVariable Long vehicleId,
-            @RequestHeader("Authorization") String authHeader) {
-        Long userId = extractUserId(authHeader);
+            @RequestHeader(value = "X-User-ID", required = false) Long xUserId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Long userId = extractUserId(xUserId, authHeader);
         if (userId == null) {
             return ApiResponse.error(401, "未授权访问");
         }
@@ -58,8 +60,9 @@ public class UserVehicleController {
     @PostMapping
     public ApiResponse<UserVehicleDTO> addVehicle(
             @RequestBody UserVehicleDTO dto,
-            @RequestHeader("Authorization") String authHeader) {
-        Long userId = extractUserId(authHeader);
+            @RequestHeader(value = "X-User-ID", required = false) Long xUserId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Long userId = extractUserId(xUserId, authHeader);
         if (userId == null) {
             return ApiResponse.error(401, "未授权访问");
         }
@@ -85,7 +88,7 @@ public class UserVehicleController {
             vehicle.setNotes(dto.getNotes());
             
             UserVehicle saved = userVehicleService.create(vehicle);
-            return ApiResponse.success(toDTO(saved));
+            return ApiResponse.success("添加成功", toDTO(saved));
         } catch (RuntimeException e) {
             return ApiResponse.error(e.getMessage());
         }
@@ -95,8 +98,9 @@ public class UserVehicleController {
     public ApiResponse<UserVehicleDTO> updateVehicle(
             @PathVariable Long vehicleId,
             @RequestBody UserVehicleDTO dto,
-            @RequestHeader("Authorization") String authHeader) {
-        Long userId = extractUserId(authHeader);
+            @RequestHeader(value = "X-User-ID", required = false) Long xUserId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Long userId = extractUserId(xUserId, authHeader);
         if (userId == null) {
             return ApiResponse.error(401, "未授权访问");
         }
@@ -111,7 +115,7 @@ public class UserVehicleController {
             vehicleData.setNotes(dto.getNotes());
             
             UserVehicle updated = userVehicleService.update(vehicleId, userId, vehicleData);
-            return ApiResponse.success(toDTO(updated));
+            return ApiResponse.success("更新成功", toDTO(updated));
         } catch (RuntimeException e) {
             return ApiResponse.error(e.getMessage());
         }
@@ -120,15 +124,16 @@ public class UserVehicleController {
     @DeleteMapping("/{vehicleId}")
     public ApiResponse<Void> deleteVehicle(
             @PathVariable Long vehicleId,
-            @RequestHeader("Authorization") String authHeader) {
-        Long userId = extractUserId(authHeader);
+            @RequestHeader(value = "X-User-ID", required = false) Long xUserId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Long userId = extractUserId(xUserId, authHeader);
         if (userId == null) {
             return ApiResponse.error(401, "未授权访问");
         }
         
         try {
             userVehicleService.delete(vehicleId, userId);
-            return ApiResponse.success(null);
+            return ApiResponse.success("删除成功", null);
         } catch (RuntimeException e) {
             return ApiResponse.error(e.getMessage());
         }
@@ -137,8 +142,9 @@ public class UserVehicleController {
     @GetMapping("/{vehicleId}/status")
     public ApiResponse<UserVehicleStatusDTO> getVehicleStatus(
             @PathVariable Long vehicleId,
-            @RequestHeader("Authorization") String authHeader) {
-        Long userId = extractUserId(authHeader);
+            @RequestHeader(value = "X-User-ID", required = false) Long xUserId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Long userId = extractUserId(xUserId, authHeader);
         if (userId == null) {
             return ApiResponse.error(401, "未授权访问");
         }
@@ -165,7 +171,11 @@ public class UserVehicleController {
         return ApiResponse.success(statusDTO);
     }
     
-    private Long extractUserId(String authHeader) {
+    private Long extractUserId(Long xUserId, String authHeader) {
+        if (xUserId != null) {
+            return xUserId;
+        }
+        
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
         }
@@ -178,7 +188,10 @@ public class UserVehicleController {
         if (userIdObj instanceof Integer) {
             return ((Integer) userIdObj).longValue();
         }
-        return (Long) userIdObj;
+        if (userIdObj instanceof Long) {
+            return (Long) userIdObj;
+        }
+        return null;
     }
     
     private UserVehicleDTO toDTO(UserVehicle vehicle) {
