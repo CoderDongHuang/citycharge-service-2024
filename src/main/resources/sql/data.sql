@@ -85,13 +85,29 @@ INSERT INTO user (id, username, password, email, role, avatar, status, last_logi
 (2, 'operator', 'e10adc3949ba59abbe56e057f20f883e', 'operator@citycharge.com', 'operator', NULL, 1, NULL, NOW(), NOW()),
 (3, 'user', 'e10adc3949ba59abbe56e057f20f883e', 'user@citycharge.com', 'user', NULL, 1, NULL, NOW(), NOW());
 
--- 数据验证查询（可选）
--- SELECT '车辆数据:' AS info, COUNT(*) AS count FROM vehicle
--- UNION ALL
--- SELECT '电池数据:', COUNT(*) FROM battery
--- UNION ALL
--- SELECT '充电站数据:', COUNT(*) FROM charging_stations
--- UNION ALL
--- SELECT '报警记录:', COUNT(*) FROM alarm_records
--- UNION ALL
--- SELECT '换电记录:', COUNT(*) FROM battery_swap_records;
+-- 插入用户车辆数据
+INSERT INTO user_vehicle (id, user_id, name, brand, vin, plate_number, purchase_date, notes, status, battery_level, latitude, longitude, last_online_time, created_at, updated_at) VALUES
+(1, 3, '特斯拉 Model 3', 'Tesla', 'LSVNV2182N1234567', '京A12345', '2023-06-15', '日常通勤用车', 'online', 85, 39.9042, 116.4074, NOW(), NOW(), NOW()),
+(2, 3, '比亚迪汉EV', 'BYD', 'LGXCE1CB2N7654321', '京B67890', '2023-08-20', '家用车', 'offline', 60, 39.9142, 116.4174, DATE_SUB(NOW(), INTERVAL 2 DAY), NOW(), NOW()),
+(3, 1, '蔚来ES6', 'NIO', 'LSGAJ8E52N1111111', '京C11111', '2023-03-10', '公司用车', 'online', 92, 39.9242, 116.4274, NOW(), NOW(), NOW()),
+(4, 2, '小鹏P7', 'XPeng', 'LFPCH1AA2N2222222', '京D22222', '2023-09-01', '测试车辆', 'offline', 45, 39.9342, 116.4374, DATE_SUB(NOW(), INTERVAL 1 DAY), NOW(), NOW());
+
+-- 插入用户电池数据
+INSERT INTO user_battery (id, user_id, name, model, code, capacity, purchase_date, notes, status, current_level, voltage, temperature, cycle_count, last_charge_time, created_at, updated_at) VALUES
+(1, 3, '主电池包', 'CATL-60kWh', 'BAT20240001', 60, '2024-01-15', '三元锂电池', 'online', 85, 380.5, 25.5, 120, DATE_SUB(NOW(), INTERVAL 2 DAY), NOW(), NOW()),
+(2, 3, '备用电池包', 'BYD-55kWh', 'BAT20240002', 55, '2024-02-20', '磷酸铁锂电池', 'offline', 45, 370.2, 22.0, 85, DATE_SUB(NOW(), INTERVAL 5 DAY), NOW(), NOW()),
+(3, 1, '主电池包', 'CATL-84kWh', 'BAT20240003', 84, '2024-03-01', '三元锂电池', 'charging', 92, 395.0, 28.0, 50, NOW(), NOW(), NOW()),
+(4, 2, '主电池包', 'CALB-70kWh', 'BAT20240004', 70, '2023-12-10', '磷酸铁锂电池', 'online', 78, 375.8, 24.5, 200, DATE_SUB(NOW(), INTERVAL 3 DAY), NOW(), NOW());
+
+-- 插入用户订单数据
+INSERT INTO user_order (id, user_id, vehicle_id, vehicle_name, station_id, station_name, battery_info, amount, status, create_time, pay_time, complete_time, cancel_time, notes, created_at, updated_at) VALUES
+('ORD20240115001', 3, 1, '特斯拉 Model 3', 1, '中心换电站', '60kWh - 95%', 89.00, 'completed', DATE_SUB(NOW(), INTERVAL 7 DAY), DATE_SUB(NOW(), INTERVAL 7 DAY), DATE_SUB(NOW(), INTERVAL 7 DAY), NULL, NULL, NOW(), NOW()),
+('ORD20240116001', 3, 1, '特斯拉 Model 3', 2, '东区换电站', '60kWh - 88%', 85.00, 'completed', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY), NULL, NULL, NOW(), NOW()),
+('ORD20240117001', 3, 2, '比亚迪汉EV', 3, '西区换电站', '76kWh - 92%', 95.00, 'completed', DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY), NULL, NULL, NOW(), NOW()),
+('ORD20240118001', 3, 1, '特斯拉 Model 3', 1, '中心换电站', '60kWh - 90%', 89.00, 'processing', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY), NULL, NULL, '正在换电中', NOW(), NOW()),
+('ORD20240119001', 3, 1, '特斯拉 Model 3', 5, '北区换电站', '60kWh - 85%', 89.00, 'pending', NOW(), NULL, NULL, NULL, '等待支付', NOW(), NOW()),
+('ORD20240119002', 3, 2, '比亚迪汉EV', 6, '开发区换电站', '76kWh - 80%', 95.00, 'pending', NOW(), NULL, NULL, NULL, '等待支付', NOW(), NOW()),
+('ORD20240119003', 3, 1, '特斯拉 Model 3', 8, '新区换电站', '60kWh - 75%', 89.00, 'cancelled', DATE_SUB(NOW(), INTERVAL 2 DAY), NULL, NULL, DATE_SUB(NOW(), INTERVAL 2 DAY), '用户取消', NOW(), NOW()),
+('ORD20240115002', 1, 3, '蔚来ES6', 1, '中心换电站', '84kWh - 95%', 120.00, 'completed', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY), NULL, NULL, NOW(), NOW()),
+('ORD20240116002', 1, 3, '蔚来ES6', 4, '南区换电站', '84kWh - 88%', 120.00, 'completed', DATE_SUB(NOW(), INTERVAL 6 DAY), DATE_SUB(NOW(), INTERVAL 6 DAY), DATE_SUB(NOW(), INTERVAL 6 DAY), NULL, NULL, NOW(), NOW()),
+('ORD20240115003', 2, 4, '小鹏P7', 2, '东区换电站', '70kWh - 92%', 99.00, 'completed', DATE_SUB(NOW(), INTERVAL 8 DAY), DATE_SUB(NOW(), INTERVAL 8 DAY), DATE_SUB(NOW(), INTERVAL 8 DAY), NULL, NULL, NOW(), NOW());

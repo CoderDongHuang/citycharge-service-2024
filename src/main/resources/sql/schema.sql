@@ -129,3 +129,75 @@ CREATE TABLE IF NOT EXISTS user (
     INDEX idx_github_id (github_id),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户信息表';
+
+-- 用户车辆表 - 存储用户绑定的车辆信息
+CREATE TABLE IF NOT EXISTS user_vehicle (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    name VARCHAR(100) NOT NULL COMMENT '车辆名称',
+    brand VARCHAR(100) NOT NULL COMMENT '品牌',
+    vin VARCHAR(17) NOT NULL UNIQUE COMMENT '车辆识别码(VIN)',
+    plate_number VARCHAR(20) COMMENT '车牌号',
+    purchase_date DATE COMMENT '购买日期',
+    notes VARCHAR(500) COMMENT '备注',
+    status ENUM('online', 'offline') DEFAULT 'offline' COMMENT '状态(online/offline)',
+    battery_level INT COMMENT '电池电量(%)',
+    latitude DECIMAL(10,7) COMMENT '纬度',
+    longitude DECIMAL(10,7) COMMENT '经度',
+    last_online_time DATETIME COMMENT '最后在线时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_user_id (user_id),
+    INDEX idx_vin (vin),
+    INDEX idx_plate_number (plate_number),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户车辆表';
+
+-- 用户电池表 - 存储用户绑定的电池信息
+CREATE TABLE IF NOT EXISTS user_battery (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    name VARCHAR(100) NOT NULL COMMENT '电池名称',
+    model VARCHAR(100) NOT NULL COMMENT '电池型号',
+    code VARCHAR(50) NOT NULL UNIQUE COMMENT '电池编码',
+    capacity INT COMMENT '容量(kWh)',
+    purchase_date DATE COMMENT '购买日期',
+    notes VARCHAR(500) COMMENT '备注',
+    status ENUM('online', 'offline', 'charging') DEFAULT 'offline' COMMENT '状态(online/offline/charging)',
+    current_level INT COMMENT '当前电量(%)',
+    voltage DOUBLE COMMENT '电压(V)',
+    temperature DOUBLE COMMENT '温度(℃)',
+    cycle_count INT DEFAULT 0 COMMENT '循环次数',
+    last_charge_time DATETIME COMMENT '最后充电时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_user_id (user_id),
+    INDEX idx_code (code),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户电池表';
+
+-- 用户订单表 - 存储用户换电订单信息
+CREATE TABLE IF NOT EXISTS user_order (
+    id VARCHAR(50) PRIMARY KEY COMMENT '订单号',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    vehicle_id BIGINT COMMENT '车辆ID',
+    vehicle_name VARCHAR(100) COMMENT '车辆名称',
+    station_id BIGINT COMMENT '换电站ID',
+    station_name VARCHAR(100) COMMENT '换电站名称',
+    battery_info VARCHAR(100) COMMENT '电池信息',
+    amount DECIMAL(10,2) COMMENT '订单金额',
+    status ENUM('pending', 'processing', 'completed', 'cancelled') DEFAULT 'pending' COMMENT '订单状态',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    pay_time DATETIME COMMENT '支付时间',
+    complete_time DATETIME COMMENT '完成时间',
+    cancel_time DATETIME COMMENT '取消时间',
+    notes VARCHAR(500) COMMENT '备注',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_user_id (user_id),
+    INDEX idx_status (status),
+    INDEX idx_create_time (create_time),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (vehicle_id) REFERENCES user_vehicle(id) ON DELETE SET NULL,
+    FOREIGN KEY (station_id) REFERENCES station(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户订单表';
