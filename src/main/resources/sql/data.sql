@@ -80,10 +80,10 @@ INSERT INTO station (id, station_id, name, position_x, position_y, address, batt
 (10, 'ST010', '商业中心换电站', 60, 20, '商业中心B座99号', 24, 20, 'active', '08:00-21:00', '13800138010', '钱主任', NOW(), NOW());
 
 -- 插入用户数据（密码为 123456 的加密值）
-INSERT INTO user (id, username, password, email, role, avatar, status, last_login, created_at, updated_at) VALUES
-(1, 'admin', 'e10adc3949ba59abbe56e057f20f883e', 'admin@citycharge.com', 'admin', NULL, 1, NULL, NOW(), NOW()),
-(2, 'operator', 'e10adc3949ba59abbe56e057f20f883e', 'operator@citycharge.com', 'operator', NULL, 1, NULL, NOW(), NOW()),
-(3, 'user', 'e10adc3949ba59abbe56e057f20f883e', 'user@citycharge.com', 'user', NULL, 1, NULL, NOW(), NOW());
+INSERT INTO user (id, username, password, email, phone, role, avatar, status, notifications, dark_mode, last_login, created_at, updated_at) VALUES
+(1, 'admin', 'e10adc3949ba59abbe56e057f20f883e', 'admin@citycharge.com', '13800138001', 'admin', NULL, 1, 1, 0, NULL, NOW(), NOW()),
+(2, 'operator', 'e10adc3949ba59abbe56e057f20f883e', 'operator@citycharge.com', '13800138002', 'operator', NULL, 1, 1, 0, NULL, NOW(), NOW()),
+(3, 'user', 'e10adc3949ba59abbe56e057f20f883e', 'user@citycharge.com', '13800138003', 'user', NULL, 1, 1, 0, NULL, NOW(), NOW());
 
 -- 插入用户车辆数据
 INSERT INTO user_vehicle (id, user_id, name, brand, vin, plate_number, purchase_date, notes, status, battery_level, latitude, longitude, last_online_time, created_at, updated_at) VALUES

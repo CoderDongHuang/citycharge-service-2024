@@ -41,6 +41,16 @@ spring:
     resources:
       static-locations: classpath:/static/
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+avatar:
+  upload:
+    path: ${user.home}/citycharge-uploads/avatars
+
 # 自定义配置
 citycharge:
   map:

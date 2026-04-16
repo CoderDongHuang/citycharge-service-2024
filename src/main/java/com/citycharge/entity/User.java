@@ -20,6 +20,9 @@ public class User {
     @Column(name = "email", length = 100)
     private String email;
     
+    @Column(name = "phone", length = 20)
+    private String phone;
+    
     @Column(name = "github_id", length = 50)
     private String githubId;
     
@@ -34,6 +37,12 @@ public class User {
     
     @Column(name = "status")
     private Integer status = 1;
+    
+    @Column(name = "notifications")
+    private Boolean notifications = true;
+    
+    @Column(name = "dark_mode")
+    private Boolean darkMode = false;
     
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
@@ -54,6 +63,12 @@ public class User {
         if (role == null) {
             role = "user";
         }
+        if (notifications == null) {
+            notifications = true;
+        }
+        if (darkMode == null) {
+            darkMode = false;
+        }
     }
     
     @PreUpdate
@@ -73,6 +88,9 @@ public class User {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    
     public String getGithubId() { return githubId; }
     public void setGithubId(String githubId) { this.githubId = githubId; }
     
@@ -87,6 +105,12 @@ public class User {
     
     public Integer getStatus() { return status; }
     public void setStatus(Integer status) { this.status = status; }
+    
+    public Boolean getNotifications() { return notifications; }
+    public void setNotifications(Boolean notifications) { this.notifications = notifications; }
+    
+    public Boolean getDarkMode() { return darkMode; }
+    public void setDarkMode(Boolean darkMode) { this.darkMode = darkMode; }
     
     public LocalDateTime getLastLogin() { return lastLogin; }
     public void setLastLogin(LocalDateTime lastLogin) { this.lastLogin = lastLogin; }
