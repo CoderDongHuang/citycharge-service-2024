@@ -1,6 +1,7 @@
 package com.citycharge.entity;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,11 +18,21 @@ public class Station {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
     
-    @Column(name = "position_x", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", length = 20)
+    private Type type = Type.battery;
+    
+    @Column(name = "position_x")
     private Integer positionX;
     
-    @Column(name = "position_y", nullable = false)
+    @Column(name = "position_y")
     private Integer positionY;
+    
+    @Column(name = "latitude", precision = 10, scale = 7)
+    private BigDecimal latitude;
+    
+    @Column(name = "longitude", precision = 10, scale = 7)
+    private BigDecimal longitude;
     
     @Column(name = "address", length = 255)
     private String address;
@@ -32,9 +43,21 @@ public class Station {
     @Column(name = "available_batteries")
     private Integer availableBatteries = 0;
     
+    @Column(name = "available_slots")
+    private Integer availableSlots = 0;
+    
+    @Column(name = "rating", precision = 2, scale = 1)
+    private BigDecimal rating = new BigDecimal("5.0");
+    
+    @Column(name = "total_swaps")
+    private Integer totalSwaps = 0;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
     private Status status = Status.active;
+    
+    @Column(name = "service_time", length = 50)
+    private String serviceTime;
     
     @Column(name = "operating_hours", length = 100)
     private String operatingHours;
@@ -45,6 +68,9 @@ public class Station {
     @Column(name = "manager", length = 50)
     private String manager;
     
+    @Column(name = "facilities", columnDefinition = "JSON")
+    private String facilities;
+    
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
@@ -52,7 +78,11 @@ public class Station {
     private LocalDateTime updatedAt;
     
     public enum Status {
-        active, maintenance, closed, offline
+        active, maintenance, closed, offline, online
+    }
+    
+    public enum Type {
+        battery, service, all
     }
     
     @PrePersist
@@ -78,11 +108,20 @@ public class Station {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     
+    public Type getType() { return type; }
+    public void setType(Type type) { this.type = type; }
+    
     public Integer getPositionX() { return positionX; }
     public void setPositionX(Integer positionX) { this.positionX = positionX; }
     
     public Integer getPositionY() { return positionY; }
     public void setPositionY(Integer positionY) { this.positionY = positionY; }
+    
+    public BigDecimal getLatitude() { return latitude; }
+    public void setLatitude(BigDecimal latitude) { this.latitude = latitude; }
+    
+    public BigDecimal getLongitude() { return longitude; }
+    public void setLongitude(BigDecimal longitude) { this.longitude = longitude; }
     
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
@@ -93,8 +132,20 @@ public class Station {
     public Integer getAvailableBatteries() { return availableBatteries; }
     public void setAvailableBatteries(Integer availableBatteries) { this.availableBatteries = availableBatteries; }
     
+    public Integer getAvailableSlots() { return availableSlots; }
+    public void setAvailableSlots(Integer availableSlots) { this.availableSlots = availableSlots; }
+    
+    public BigDecimal getRating() { return rating; }
+    public void setRating(BigDecimal rating) { this.rating = rating; }
+    
+    public Integer getTotalSwaps() { return totalSwaps; }
+    public void setTotalSwaps(Integer totalSwaps) { this.totalSwaps = totalSwaps; }
+    
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+    
+    public String getServiceTime() { return serviceTime; }
+    public void setServiceTime(String serviceTime) { this.serviceTime = serviceTime; }
     
     public String getOperatingHours() { return operatingHours; }
     public void setOperatingHours(String operatingHours) { this.operatingHours = operatingHours; }
@@ -104,6 +155,9 @@ public class Station {
     
     public String getManager() { return manager; }
     public void setManager(String manager) { this.manager = manager; }
+    
+    public String getFacilities() { return facilities; }
+    public void setFacilities(String facilities) { this.facilities = facilities; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

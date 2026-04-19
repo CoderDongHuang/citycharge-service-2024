@@ -2,6 +2,21 @@
 CREATE DATABASE IF NOT EXISTS citycharge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE citycharge;
 
+-- 删除旧表（按外键依赖顺序）
+DROP TABLE IF EXISTS station_status_report;
+DROP TABLE IF EXISTS station_service_info;
+DROP TABLE IF EXISTS station_photo;
+DROP TABLE IF EXISTS user_order;
+DROP TABLE IF EXISTS contact_message;
+DROP TABLE IF EXISTS user_battery;
+DROP TABLE IF EXISTS user_vehicle;
+DROP TABLE IF EXISTS station;
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS command_log;
+DROP TABLE IF EXISTS alert_log;
+DROP TABLE IF EXISTS battery;
+DROP TABLE IF EXISTS vehicle;
+
 -- 车辆表 - 存储电车基本信息
 CREATE TABLE IF NOT EXISTS vehicle (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
@@ -94,21 +109,79 @@ CREATE TABLE IF NOT EXISTS station (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
     station_id VARCHAR(50) NOT NULL UNIQUE COMMENT '换电站编号',
     name VARCHAR(100) NOT NULL COMMENT '换电站名称',
-    position_x INT NOT NULL COMMENT 'X坐标',
-    position_y INT NOT NULL COMMENT 'Y坐标',
+    type ENUM('battery', 'service', 'all') DEFAULT 'battery' COMMENT '站点类型',
+    position_x INT COMMENT 'X坐标',
+    position_y INT COMMENT 'Y坐标',
+    latitude DECIMAL(10,7) COMMENT '纬度',
+    longitude DECIMAL(10,7) COMMENT '经度',
     address VARCHAR(255) COMMENT '详细地址',
     battery_capacity INT DEFAULT 10 COMMENT '电池容量',
     available_batteries INT DEFAULT 0 COMMENT '可用电池数量',
-    status ENUM('active', 'maintenance', 'closed') DEFAULT 'active' COMMENT '状态',
+    available_slots INT DEFAULT 0 COMMENT '可用槽位',
+    rating DECIMAL(2,1) DEFAULT 5.0 COMMENT '评分',
+    total_swaps INT DEFAULT 0 COMMENT '总换电次数',
+    status ENUM('active', 'maintenance', 'closed', 'offline', 'online') DEFAULT 'active' COMMENT '状态',
+    service_time VARCHAR(50) COMMENT '服务时间',
     operating_hours VARCHAR(100) COMMENT '营业时间',
     contact_phone VARCHAR(20) COMMENT '联系电话',
     manager VARCHAR(50) COMMENT '负责人',
+    facilities JSON COMMENT '设施',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_station_id (station_id),
+    INDEX idx_type (type),
     INDEX idx_position (position_x, position_y),
+    INDEX idx_latitude_longitude (latitude, longitude),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='换电站信息表';
+
+-- 站点照片表 - 存储站点照片信息
+CREATE TABLE IF NOT EXISTS station_photo (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    photo_id VARCHAR(50) NOT NULL UNIQUE COMMENT '照片ID',
+    station_id BIGINT NOT NULL COMMENT '站点ID',
+    url VARCHAR(500) NOT NULL COMMENT '照片URL',
+    type ENUM('main', 'slot', 'battery', 'environment', 'guide') DEFAULT 'main' COMMENT '照片类型',
+    description VARCHAR(255) COMMENT '照片描述',
+    upload_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    INDEX idx_photo_id (photo_id),
+    INDEX idx_station_id (station_id),
+    INDEX idx_type (type),
+    FOREIGN KEY (station_id) REFERENCES station(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='站点照片表';
+
+-- 站点服务表 - 存储站点提供的服务信息
+CREATE TABLE IF NOT EXISTS station_service_info (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    station_id BIGINT NOT NULL COMMENT '站点ID',
+    name VARCHAR(100) NOT NULL COMMENT '服务名称',
+    price DECIMAL(10,2) DEFAULT 0.00 COMMENT '价格',
+    duration VARCHAR(50) COMMENT '服务时长',
+    description VARCHAR(500) COMMENT '服务描述',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_station_id (station_id),
+    FOREIGN KEY (station_id) REFERENCES station(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='站点服务表';
+
+-- 站点状态上报表 - 存储用户上报的站点状态
+CREATE TABLE IF NOT EXISTS station_status_report (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    station_id BIGINT NOT NULL COMMENT '站点ID',
+    user_id BIGINT COMMENT '用户ID',
+    type ENUM('battery_low', 'device_error', 'full_battery', 'other') NOT NULL COMMENT '上报类型',
+    description TEXT COMMENT '描述',
+    status ENUM('pending', 'processing', 'resolved', 'closed') DEFAULT 'pending' COMMENT '处理状态',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_station_id (station_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_type (type),
+    INDEX idx_status (status),
+    FOREIGN KEY (station_id) REFERENCES station(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='站点状态上报表';
 
 -- 用户表 - 存储用户账号信息
 CREATE TABLE IF NOT EXISTS user (

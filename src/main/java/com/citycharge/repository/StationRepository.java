@@ -1,6 +1,8 @@
 package com.citycharge.repository;
 
 import com.citycharge.entity.Station;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +17,10 @@ public interface StationRepository extends JpaRepository<Station, Long> {
     Optional<Station> findByStationId(String stationId);
     
     List<Station> findByStatus(Station.Status status);
+    
+    List<Station> findByType(Station.Type type);
+    
+    Page<Station> findByType(Station.Type type, Pageable pageable);
     
     List<Station> findByNameContaining(String name);
     
