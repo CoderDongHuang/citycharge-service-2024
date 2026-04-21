@@ -275,6 +275,8 @@ public class UserStationService {
         dto.setAvailableSlots(station.getAvailableSlots());
         dto.setServiceTime(station.getServiceTime());
         dto.setStatus(station.getStatus() != null ? station.getStatus().name() : "active");
+        dto.setContactPhone(station.getContactPhone());
+        dto.setManager(station.getManager());
         
         List<StationPhoto> photos = stationPhotoRepository.findByStationIdAndType(station.getId(), StationPhoto.PhotoType.main);
         if (!photos.isEmpty()) {
@@ -293,7 +295,8 @@ public class UserStationService {
         dto.setAddress(station.getAddress());
         dto.setLatitude(station.getLatitude());
         dto.setLongitude(station.getLongitude());
-        dto.setPhone(station.getContactPhone());
+        dto.setContactPhone(station.getContactPhone());
+        dto.setManager(station.getManager());
         dto.setServiceTime(station.getServiceTime());
         dto.setRating(station.getRating());
         dto.setTotalSwaps(station.getTotalSwaps());

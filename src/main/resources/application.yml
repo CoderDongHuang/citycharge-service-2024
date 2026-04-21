@@ -51,6 +51,10 @@ avatar:
   upload:
     path: ${user.home}/citycharge-uploads/avatars
 
+station:
+  upload:
+    path: ${user.home}/citycharge-uploads/stations
+
 # 自定义配置
 citycharge:
   map:

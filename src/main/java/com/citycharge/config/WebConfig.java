@@ -13,10 +13,17 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${avatar.upload.path:uploads/avatars}")
     private String avatarUploadPath;
     
+    @Value("${station.upload.path:uploads/stations}")
+    private String stationUploadPath;
+    
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String absolutePath = Paths.get(avatarUploadPath).toAbsolutePath().normalize().toString();
+        String avatarAbsolutePath = Paths.get(avatarUploadPath).toAbsolutePath().normalize().toString();
         registry.addResourceHandler("/avatars/**")
-                .addResourceLocations("file:" + absolutePath + "/");
+                .addResourceLocations("file:" + avatarAbsolutePath + "/");
+        
+        String stationAbsolutePath = Paths.get(stationUploadPath).toAbsolutePath().normalize().toString();
+        registry.addResourceHandler("/uploads/stations/**")
+                .addResourceLocations("file:" + stationAbsolutePath + "/");
     }
 }

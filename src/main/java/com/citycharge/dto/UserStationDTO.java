@@ -20,5 +20,7 @@ public class UserStationDTO {
     private Integer availableSlots;
     private String serviceTime;
     private String status;
+    private String contactPhone;
+    private String manager;
     private List<StationPhotoDTO> photos;
 }

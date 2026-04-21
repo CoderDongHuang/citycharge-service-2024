@@ -5,9 +5,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Data
-public class StationDetailDTO {
-    private String id;
-    private String stationId;
+public class CreateStationDTO {
     private String name;
     private String type;
     private String address;
@@ -16,12 +14,8 @@ public class StationDetailDTO {
     private String contactPhone;
     private String manager;
     private String serviceTime;
-    private BigDecimal rating;
-    private Integer totalSwaps;
     private Integer availableBatteries;
     private Integer availableSlots;
     private String status;
-    private List<String> facilities;
-    private List<StationPhotoDTO> photos;
-    private List<StationServiceDTO> services;
+    private List<String> photoUrls;
 }
