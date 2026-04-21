@@ -219,6 +219,8 @@ CREATE TABLE IF NOT EXISTS user_vehicle (
     notes VARCHAR(500) COMMENT '备注',
     status ENUM('online', 'offline') DEFAULT 'offline' COMMENT '状态(online/offline)',
     battery_level INT COMMENT '电池电量(%)',
+    voltage DOUBLE COMMENT '电压(V)',
+    temperature DOUBLE COMMENT '温度(℃)',
     latitude DECIMAL(10,7) COMMENT '纬度',
     longitude DECIMAL(10,7) COMMENT '经度',
     last_online_time DATETIME COMMENT '最后在线时间',
@@ -245,11 +247,13 @@ CREATE TABLE IF NOT EXISTS user_battery (
     voltage DOUBLE COMMENT '电压(V)',
     temperature DOUBLE COMMENT '温度(℃)',
     cycle_count INT DEFAULT 0 COMMENT '循环次数',
+    current_vehicle_id BIGINT COMMENT '当前安装的车辆ID',
     last_charge_time DATETIME COMMENT '最后充电时间',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_user_id (user_id),
     INDEX idx_code (code),
+    INDEX idx_vehicle_id (current_vehicle_id),
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户电池表';
 

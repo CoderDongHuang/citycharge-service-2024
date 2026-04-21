@@ -14,6 +14,9 @@ public class UserBatteryDTO {
     private LocalDate purchaseDate;
     private String status;
     private String notes;
+    private Long currentVehicleId;
+    private String currentVehicleName;
+    private String currentVehiclePlate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

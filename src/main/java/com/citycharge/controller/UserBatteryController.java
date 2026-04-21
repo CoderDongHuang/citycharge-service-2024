@@ -3,6 +3,7 @@ package com.citycharge.controller;
 import com.citycharge.common.ApiResponse;
 import com.citycharge.dto.UserBatteryDTO;
 import com.citycharge.entity.UserBattery;
+import com.citycharge.entity.UserVehicle;
 import com.citycharge.service.UserBatteryService;
 import com.citycharge.util.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -32,7 +33,7 @@ public class UserBatteryController {
         
         List<UserBattery> batteries = userBatteryService.findByUserId(userId);
         List<UserBatteryDTO> dtos = batteries.stream()
-            .map(this::toDTO)
+            .map(b -> toDTO(b, userId))
             .collect(Collectors.toList());
         
         return ApiResponse.success(dtos);
@@ -53,7 +54,7 @@ public class UserBatteryController {
             return ApiResponse.error(404, "电池不存在");
         }
         
-        return ApiResponse.success(toDTO(battery.get()));
+        return ApiResponse.success(toDTO(battery.get(), userId));
     }
     
     @PostMapping
@@ -85,9 +86,10 @@ public class UserBatteryController {
             battery.setCapacity(dto.getCapacity());
             battery.setPurchaseDate(dto.getPurchaseDate());
             battery.setNotes(dto.getNotes());
+            battery.setCurrentVehicleId(dto.getCurrentVehicleId());
             
             UserBattery saved = userBatteryService.create(battery);
-            return ApiResponse.success("添加成功", toDTO(saved));
+            return ApiResponse.success("添加成功", toDTO(saved, userId));
         } catch (RuntimeException e) {
             return ApiResponse.error(e.getMessage());
         }
@@ -112,9 +114,10 @@ public class UserBatteryController {
             batteryData.setCapacity(dto.getCapacity());
             batteryData.setPurchaseDate(dto.getPurchaseDate());
             batteryData.setNotes(dto.getNotes());
+            batteryData.setCurrentVehicleId(dto.getCurrentVehicleId());
             
             UserBattery updated = userBatteryService.update(batteryId, userId, batteryData);
-            return ApiResponse.success("更新成功", toDTO(updated));
+            return ApiResponse.success("更新成功", toDTO(updated, userId));
         } catch (RuntimeException e) {
             return ApiResponse.error(e.getMessage());
         }
@@ -161,7 +164,7 @@ public class UserBatteryController {
         return null;
     }
     
-    private UserBatteryDTO toDTO(UserBattery battery) {
+    private UserBatteryDTO toDTO(UserBattery battery, Long userId) {
         UserBatteryDTO dto = new UserBatteryDTO();
         dto.setId(battery.getId());
         dto.setName(battery.getName());
@@ -171,8 +174,19 @@ public class UserBatteryController {
         dto.setPurchaseDate(battery.getPurchaseDate());
         dto.setNotes(battery.getNotes());
         dto.setStatus(battery.getStatus() != null ? battery.getStatus().name() : "offline");
+        dto.setCurrentVehicleId(battery.getCurrentVehicleId());
         dto.setCreatedAt(battery.getCreatedAt());
         dto.setUpdatedAt(battery.getUpdatedAt());
+        
+        if (battery.getCurrentVehicleId() != null) {
+            Optional<UserVehicle> vehicle = userBatteryService.findVehicleByIdAndUserId(
+                battery.getCurrentVehicleId(), userId);
+            if (vehicle.isPresent()) {
+                dto.setCurrentVehicleName(vehicle.get().getName());
+                dto.setCurrentVehiclePlate(vehicle.get().getPlateNumber());
+            }
+        }
+        
         return dto;
     }
 }

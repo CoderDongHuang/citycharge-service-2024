@@ -3,6 +3,7 @@ package com.citycharge.config;
 import com.citycharge.service.MqttVehicleStatusService;
 import com.citycharge.service.VehicleOnlineStatusService;
 import com.citycharge.service.BatteryAlarmService;
+import com.citycharge.service.UserVehicleMqttService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -24,6 +25,7 @@ public class MqttMessageListenerConfig {
     private final MqttVehicleStatusService vehicleStatusService;
     private final VehicleOnlineStatusService onlineStatusService;
     private final BatteryAlarmService batteryAlarmService;
+    private final UserVehicleMqttService userVehicleMqttService;
     private MqttClient mqttClient;
     
     @EventListener(ApplicationReadyEvent.class)
@@ -62,7 +64,13 @@ public class MqttMessageListenerConfig {
                 handleBatteryAlarmMessage(topic, message);
             });
             
-            log.info("MQTT订阅成功，主题: {}, {}, {}", vehicleStatusTopic, vehicleOnlineTopic, batteryAlarmTopic);
+            // 订阅用户车辆状态主题（用户端车辆+电池数据）
+            String userVehicleStatusTopic = "user/vehicle/+/status";
+            mqttClient.subscribe(userVehicleStatusTopic, 1, (topic, message) -> {
+                handleUserVehicleStatusMessage(topic, message);
+            });
+            
+            log.info("MQTT订阅成功，主题: {}, {}, {}, {}", vehicleStatusTopic, vehicleOnlineTopic, batteryAlarmTopic, userVehicleStatusTopic);
             
         } catch (Exception e) {
             log.error("MQTT初始化失败: {}", e.getMessage(), e);
@@ -130,6 +138,18 @@ public class MqttMessageListenerConfig {
             
         } catch (Exception e) {
             log.error("处理电池报警消息失败，主题: {}, 错误: {}", topic, e.getMessage(), e);
+        }
+    }
+    
+    private void handleUserVehicleStatusMessage(String topic, MqttMessage message) {
+        try {
+            String payload = new String(message.getPayload());
+            log.info("收到用户车辆状态消息，主题: {}, 内容: {}", topic, payload);
+            
+            userVehicleMqttService.handleUserVehicleStatus(topic, payload);
+            
+        } catch (Exception e) {
+            log.error("处理用户车辆状态消息失败，主题: {}, 错误: {}", topic, e.getMessage(), e);
         }
     }
     

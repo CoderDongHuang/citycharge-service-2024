@@ -57,6 +57,16 @@ system/broadcast
 - **发布者**: 后端服务
 - **订阅者**: 所有车载系统
 
+### 3.6 用户车辆状态主题（用户端专用）
+```
+user/vehicle/{vehicleId}/status
+```
+- `{vehicleId}`: 用户车辆表主键ID（如：1）
+- **用途**: 用户端车辆上报车辆和电池状态信息
+- **发布者**: 用户端车载系统
+- **订阅者**: 后端服务
+- **说明**: 同时更新 `user_vehicle` 和 `user_battery` 两张表
+
 ## 4. MQTT消息格式规范
 
 ### 4.1 车辆状态上报消息
@@ -226,6 +236,62 @@ system/broadcast
   ]
 }
 ```
+
+### 4.6 用户车辆状态消息（用户端专用）
+**主题**: `user/vehicle/{vehicleId}/status`
+
+**消息格式**:
+```json
+{
+  "timestamp": "2024-04-20T10:30:00Z",
+  "vehicleId": 1,
+  "userId": 3,
+  "vehicle": {
+    "name": "特斯拉 Model 3",
+    "plateNumber": "京A12345",
+    "status": "online",
+    "batteryLevel": 85,
+    "voltage": 380.5,
+    "temperature": 25.5,
+    "latitude": 39.9042,
+    "longitude": 116.4074
+  },
+  "battery": {
+    "id": 1,
+    "code": "BAT20240001",
+    "model": "CATL-60kWh",
+    "voltage": 380.5,
+    "temperature": 25.5,
+    "currentLevel": 85,
+    "status": "online"
+  }
+}
+```
+
+**字段说明**（对应user_vehicle和user_battery表字段）：
+
+**vehicle对象**（更新user_vehicle表）：
+| 字段 | 数据库字段 | 说明 |
+|------|-----------|------|
+| `name` | `user_vehicle.name` | 车辆名称 |
+| `plateNumber` | `user_vehicle.plate_number` | 车牌号 |
+| `status` | `user_vehicle.status` | 状态(online/offline) |
+| `batteryLevel` | `user_vehicle.battery_level` | 电池电量(%) |
+| `voltage` | `user_vehicle.voltage` | 电压(V) |
+| `temperature` | `user_vehicle.temperature` | 温度(℃) |
+| `latitude` | `user_vehicle.latitude` | 纬度 |
+| `longitude` | `user_vehicle.longitude` | 经度 |
+
+**battery对象**（更新user_battery表）：
+| 字段 | 数据库字段 | 说明 |
+|------|-----------|------|
+| `id` | `user_battery.id` | 电池ID |
+| `code` | `user_battery.code` | 电池编码（id和code二选一） |
+| `model` | `user_battery.model` | 电池型号 |
+| `voltage` | `user_battery.voltage` | 电压(V) |
+| `temperature` | `user_battery.temperature` | 温度(℃) |
+| `currentLevel` | `user_battery.current_level` | 当前电量(%) |
+| `status` | `user_battery.status` | 状态(online/offline/charging) |
 
 ## 5. 通信频率和时序要求
 

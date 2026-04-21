@@ -40,6 +40,12 @@ public class UserVehicle {
     @Column(name = "battery_level")
     private Integer batteryLevel;
     
+    @Column(name = "voltage")
+    private Double voltage;
+    
+    @Column(name = "temperature")
+    private Double temperature;
+    
     @Column(name = "latitude", precision = 10, scale = 7)
     private Double latitude;
     
@@ -99,6 +105,12 @@ public class UserVehicle {
     
     public Integer getBatteryLevel() { return batteryLevel; }
     public void setBatteryLevel(Integer batteryLevel) { this.batteryLevel = batteryLevel; }
+    
+    public Double getVoltage() { return voltage; }
+    public void setVoltage(Double voltage) { this.voltage = voltage; }
+    
+    public Double getTemperature() { return temperature; }
+    public void setTemperature(Double temperature) { this.temperature = temperature; }
     
     public Double getLatitude() { return latitude; }
     public void setLatitude(Double latitude) { this.latitude = latitude; }

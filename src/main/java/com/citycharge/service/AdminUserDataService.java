@@ -131,6 +131,16 @@ public class AdminUserDataService {
     
     private Map<Long, UserVehicle> getVehicleMapForBatteries(List<UserBattery> batteries) {
         Map<Long, UserVehicle> vehicleMap = new HashMap<>();
+        List<Long> vehicleIds = batteries.stream()
+                .filter(b -> b.getCurrentVehicleId() != null)
+                .map(UserBattery::getCurrentVehicleId)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        if (!vehicleIds.isEmpty()) {
+            List<UserVehicle> vehicles = userVehicleRepository.findAllById(vehicleIds);
+            vehicles.forEach(v -> vehicleMap.put(v.getId(), v));
+        }
         return vehicleMap;
     }
     
@@ -168,6 +178,11 @@ public class AdminUserDataService {
         dto.setBatteryLevel(battery.getCurrentLevel());
         dto.setHealth(100);
         dto.setStatus(battery.getStatus() != null ? battery.getStatus().name() : "offline");
+        dto.setCurrentVehicleId(battery.getCurrentVehicleId());
+        if (battery.getCurrentVehicleId() != null && vehicleMap.containsKey(battery.getCurrentVehicleId())) {
+            UserVehicle vehicle = vehicleMap.get(battery.getCurrentVehicleId());
+            dto.setCurrentVehiclePlate(vehicle.getPlateNumber());
+        }
         dto.setOnline(battery.getStatus() == UserBattery.BatteryStatus.online);
         dto.setLastUpdateTime(battery.getUpdatedAt());
         dto.setPurchaseDate(battery.getPurchaseDate());

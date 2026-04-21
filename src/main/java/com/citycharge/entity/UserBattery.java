@@ -49,6 +49,9 @@ public class UserBattery {
     @Column(name = "cycle_count")
     private Integer cycleCount;
     
+    @Column(name = "current_vehicle_id")
+    private Long currentVehicleId;
+    
     @Column(name = "last_charge_time")
     private LocalDateTime lastChargeTime;
     
@@ -111,6 +114,9 @@ public class UserBattery {
     
     public Integer getCycleCount() { return cycleCount; }
     public void setCycleCount(Integer cycleCount) { this.cycleCount = cycleCount; }
+    
+    public Long getCurrentVehicleId() { return currentVehicleId; }
+    public void setCurrentVehicleId(Long currentVehicleId) { this.currentVehicleId = currentVehicleId; }
     
     public LocalDateTime getLastChargeTime() { return lastChargeTime; }
     public void setLastChargeTime(LocalDateTime lastChargeTime) { this.lastChargeTime = lastChargeTime; }

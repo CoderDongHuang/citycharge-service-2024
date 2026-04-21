@@ -1,7 +1,9 @@
 package com.citycharge.service;
 
 import com.citycharge.entity.UserBattery;
+import com.citycharge.entity.UserVehicle;
 import com.citycharge.repository.UserBatteryRepository;
+import com.citycharge.repository.UserVehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,7 @@ import java.util.Optional;
 public class UserBatteryService {
     
     private final UserBatteryRepository userBatteryRepository;
+    private final UserVehicleRepository userVehicleRepository;
     
     public List<UserBattery> findByUserId(Long userId) {
         return userBatteryRepository.findByUserId(userId);
@@ -35,6 +38,14 @@ public class UserBatteryService {
         
         if (userBatteryRepository.existsByCode(battery.getCode())) {
             throw new RuntimeException("电池编码已存在");
+        }
+        
+        if (battery.getCurrentVehicleId() != null) {
+            Optional<UserVehicle> vehicle = userVehicleRepository.findByIdAndUserId(
+                battery.getCurrentVehicleId(), battery.getUserId());
+            if (!vehicle.isPresent()) {
+                throw new RuntimeException("车辆不存在或不属于当前用户");
+            }
         }
         
         return userBatteryRepository.save(battery);
@@ -67,6 +78,14 @@ public class UserBatteryService {
         if (batteryData.getNotes() != null) {
             battery.setNotes(batteryData.getNotes());
         }
+        if (batteryData.getCurrentVehicleId() != null) {
+            Optional<UserVehicle> vehicle = userVehicleRepository.findByIdAndUserId(
+                batteryData.getCurrentVehicleId(), userId);
+            if (!vehicle.isPresent()) {
+                throw new RuntimeException("车辆不存在或不属于当前用户");
+            }
+            battery.setCurrentVehicleId(batteryData.getCurrentVehicleId());
+        }
         
         return userBatteryRepository.save(battery);
     }
@@ -77,5 +96,9 @@ public class UserBatteryService {
             throw new RuntimeException("电池不存在");
         }
         userBatteryRepository.deleteByIdAndUserId(id, userId);
+    }
+    
+    public Optional<UserVehicle> findVehicleByIdAndUserId(Long vehicleId, Long userId) {
+        return userVehicleRepository.findByIdAndUserId(vehicleId, userId);
     }
 }
