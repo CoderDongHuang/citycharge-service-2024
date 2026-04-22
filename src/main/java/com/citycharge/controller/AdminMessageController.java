@@ -20,8 +20,8 @@ public class AdminMessageController {
     @PostMapping("/send")
     public ApiResponse<SendMessageResponseDTO> sendMessage(
             @RequestBody SendMessageRequestDTO request,
-            @RequestParam Long adminId,
-            @RequestParam String adminName) {
+            @RequestParam(required = false, defaultValue = "1") Long adminId,
+            @RequestParam(required = false, defaultValue = "admin") String adminName) {
         
         SendMessageResponseDTO result = adminMessageService.sendMessage(request, adminId, adminName);
         return ApiResponse.success("消息发送成功", result);
@@ -56,8 +56,8 @@ public class AdminMessageController {
     @PostMapping("/{id}/resend")
     public ApiResponse<SendMessageResponseDTO> resendMessage(
             @PathVariable Long id,
-            @RequestParam Long adminId,
-            @RequestParam String adminName) {
+            @RequestParam(required = false, defaultValue = "1") Long adminId,
+            @RequestParam(required = false, defaultValue = "admin") String adminName) {
         
         SendMessageResponseDTO result = adminMessageService.resendMessage(id, adminId, adminName);
         return ApiResponse.success("重新发送成功", result);

@@ -35,6 +35,19 @@ public class AdminMessageService {
     
     @Transactional
     public SendMessageResponseDTO sendMessage(SendMessageRequestDTO request, Long adminId, String adminName) {
+        if (request.getTitle() == null || request.getTitle().isEmpty()) {
+            throw new RuntimeException("消息标题不能为空");
+        }
+        if (request.getContent() == null || request.getContent().isEmpty()) {
+            throw new RuntimeException("消息内容不能为空");
+        }
+        if (request.getCategory() == null || request.getCategory().isEmpty()) {
+            throw new RuntimeException("消息分类不能为空");
+        }
+        if (request.getTargetType() == null || request.getTargetType().isEmpty()) {
+            throw new RuntimeException("目标类型不能为空");
+        }
+        
         List<Long> targetUserIds = getTargetUserIds(request.getTargetType(), request.getTargetIds());
         
         if (targetUserIds.isEmpty()) {
@@ -46,6 +59,15 @@ public class AdminMessageService {
         Message.SendStatus sendStatus = request.getScheduledTime() != null ? 
                 Message.SendStatus.scheduled : Message.SendStatus.sent;
         
+        String extraDataJson = null;
+        if (request.getExtraData() != null && !request.getExtraData().isEmpty()) {
+            try {
+                extraDataJson = objectMapper.writeValueAsString(request.getExtraData());
+            } catch (JsonProcessingException e) {
+                extraDataJson = null;
+            }
+        }
+        
         List<Message> messages = new ArrayList<>();
         for (Long userId : targetUserIds) {
             Message message = new Message();
@@ -56,7 +78,7 @@ public class AdminMessageService {
             message.setSourceType("管理后台");
             message.setPriority(request.getPriority() != null ? request.getPriority() : 2);
             message.setUserId(userId);
-            message.setExtraData(request.getExtraData());
+            message.setExtraData(extraDataJson);
             message.setIsRead(false);
             message.setSendStatus(sendStatus);
             message.setScheduledTime(request.getScheduledTime());
@@ -145,7 +167,16 @@ public class AdminMessageService {
         request.setCategory(originalMessage.getCategory().name());
         request.setTargetType(originalMessage.getTargetType());
         request.setPriority(originalMessage.getPriority());
-        request.setExtraData(originalMessage.getExtraData());
+        
+        if (originalMessage.getExtraData() != null && !originalMessage.getExtraData().isEmpty()) {
+            try {
+                Map<String, Object> extraDataMap = objectMapper.readValue(originalMessage.getExtraData(), 
+                        new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+                request.setExtraData(extraDataMap);
+            } catch (JsonProcessingException e) {
+                request.setExtraData(null);
+            }
+        }
         
         List<Long> targetUserIds = getTargetUserIds(originalMessage.getTargetType(), new ArrayList<>());
         request.setTargetIds(targetUserIds);
