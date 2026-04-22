@@ -20,6 +20,7 @@ public class AdminUserBatteryDTO {
     private Integer health;
     private String status;
     private Long currentVehicleId;
+    private String currentVehicleName;
     private String currentVehiclePlate;
     private Boolean online;
     private LocalDateTime lastUpdateTime;

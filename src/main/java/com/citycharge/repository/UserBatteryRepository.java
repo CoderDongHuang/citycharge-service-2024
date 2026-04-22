@@ -21,4 +21,8 @@ public interface UserBatteryRepository extends JpaRepository<UserBattery, Long> 
     long countByUserId(Long userId);
     
     void deleteByIdAndUserId(Long id, Long userId);
+    
+    Optional<UserBattery> findByCurrentVehicleId(Long currentVehicleId);
+    
+    List<UserBattery> findByCurrentVehicleIdIn(List<Long> vehicleIds);
 }

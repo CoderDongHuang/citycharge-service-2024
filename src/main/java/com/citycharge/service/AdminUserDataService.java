@@ -53,8 +53,10 @@ public class AdminUserDataService {
         int end = Math.min((start + pageable.getPageSize()), filteredVehicles.size());
         List<UserVehicle> pagedVehicles = filteredVehicles.subList(start, end);
         
+        Map<Long, UserBattery> batteryMap = getBatteryMapForVehicles(pagedVehicles);
+        
         List<AdminUserVehicleDTO> dtoList = pagedVehicles.stream()
-                .map(v -> toVehicleDTO(v, userMap.get(v.getUserId())))
+                .map(v -> toVehicleDTO(v, userMap.get(v.getUserId()), batteryMap))
                 .collect(Collectors.toList());
         
         return new PageImpl<>(dtoList, pageable, filteredVehicles.size());
@@ -144,7 +146,20 @@ public class AdminUserDataService {
         return vehicleMap;
     }
     
-    private AdminUserVehicleDTO toVehicleDTO(UserVehicle vehicle, User user) {
+    private Map<Long, UserBattery> getBatteryMapForVehicles(List<UserVehicle> vehicles) {
+        Map<Long, UserBattery> batteryMap = new HashMap<>();
+        List<Long> vehicleIds = vehicles.stream()
+                .map(UserVehicle::getId)
+                .collect(Collectors.toList());
+        
+        if (!vehicleIds.isEmpty()) {
+            List<UserBattery> batteries = userBatteryRepository.findByCurrentVehicleIdIn(vehicleIds);
+            batteries.forEach(b -> batteryMap.put(b.getCurrentVehicleId(), b));
+        }
+        return batteryMap;
+    }
+    
+    private AdminUserVehicleDTO toVehicleDTO(UserVehicle vehicle, User user, Map<Long, UserBattery> batteryMap) {
         AdminUserVehicleDTO dto = new AdminUserVehicleDTO();
         dto.setId(vehicle.getId());
         dto.setUserId(vehicle.getUserId());
@@ -156,10 +171,20 @@ public class AdminUserDataService {
         dto.setPlateNumber(vehicle.getPlateNumber());
         dto.setStatus(vehicle.getStatus() != null ? vehicle.getStatus().name() : "offline");
         dto.setBatteryLevel(vehicle.getBatteryLevel());
+        dto.setVoltage(vehicle.getVoltage());
+        dto.setTemperature(vehicle.getTemperature());
         dto.setOnline(vehicle.getStatus() == UserVehicle.VehicleStatus.online);
         dto.setLastUpdateTime(vehicle.getUpdatedAt());
         dto.setCreateTime(vehicle.getCreatedAt());
         dto.setSource("user");
+        
+        if (batteryMap.containsKey(vehicle.getId())) {
+            UserBattery battery = batteryMap.get(vehicle.getId());
+            dto.setBatteryId(battery.getId());
+            dto.setBatteryName(battery.getName());
+            dto.setBatteryCode(battery.getCode());
+        }
+        
         return dto;
     }
     
@@ -181,6 +206,7 @@ public class AdminUserDataService {
         dto.setCurrentVehicleId(battery.getCurrentVehicleId());
         if (battery.getCurrentVehicleId() != null && vehicleMap.containsKey(battery.getCurrentVehicleId())) {
             UserVehicle vehicle = vehicleMap.get(battery.getCurrentVehicleId());
+            dto.setCurrentVehicleName(vehicle.getName());
             dto.setCurrentVehiclePlate(vehicle.getPlateNumber());
         }
         dto.setOnline(battery.getStatus() == UserBattery.BatteryStatus.online);

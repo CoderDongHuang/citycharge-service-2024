@@ -15,6 +15,8 @@ public class AdminUserVehicleDTO {
     private String plateNumber;
     private String status;
     private Long batteryId;
+    private String batteryName;
+    private String batteryCode;
     private Integer batteryLevel;
     private Double voltage;
     private Double temperature;
