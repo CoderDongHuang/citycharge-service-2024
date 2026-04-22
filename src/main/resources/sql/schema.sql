@@ -301,3 +301,39 @@ CREATE TABLE IF NOT EXISTS contact_message (
     INDEX idx_created_at (created_at),
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='留言表';
+
+-- 消息表 - 存储系统消息、换电提醒、报警通知、活动公告等
+CREATE TABLE IF NOT EXISTS messages (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    title VARCHAR(200) NOT NULL COMMENT '消息标题',
+    content TEXT NOT NULL COMMENT '消息内容',
+    category ENUM('system', 'swap', 'alert', 'activity') NOT NULL COMMENT '消息分类',
+    source ENUM('admin', 'hardware') NOT NULL COMMENT '来源类型',
+    source_type VARCHAR(50) COMMENT '具体来源（如：BMS/换电站/管理后台）',
+    priority INT DEFAULT 2 COMMENT '优先级 (1-4，数字越大越优先)',
+    user_id BIGINT NOT NULL COMMENT '接收用户ID',
+    vehicle_id BIGINT COMMENT '关联车辆ID',
+    battery_id BIGINT COMMENT '关联电池ID',
+    station_id BIGINT COMMENT '关联换电站ID',
+    extra_data JSON COMMENT '扩展数据',
+    is_read TINYINT DEFAULT 0 COMMENT '是否已读',
+    read_time DATETIME COMMENT '阅读时间',
+    send_status ENUM('draft', 'scheduled', 'sent', 'cancelled') DEFAULT 'sent' COMMENT '发送状态',
+    scheduled_time DATETIME COMMENT '定时发送时间',
+    sent_time DATETIME COMMENT '发送时间',
+    admin_id BIGINT COMMENT '发送管理员ID',
+    admin_name VARCHAR(100) COMMENT '管理员姓名',
+    target_type VARCHAR(20) COMMENT '目标类型(all/user/vehicle/battery)',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_user_category (user_id, category),
+    INDEX idx_user_read (user_id, is_read),
+    INDEX idx_user_time (user_id, create_time),
+    INDEX idx_source (source),
+    INDEX idx_priority (priority),
+    INDEX idx_send_status (send_status),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (vehicle_id) REFERENCES user_vehicle(id) ON DELETE SET NULL,
+    FOREIGN KEY (battery_id) REFERENCES user_battery(id) ON DELETE SET NULL,
+    FOREIGN KEY (station_id) REFERENCES station(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='消息表';
