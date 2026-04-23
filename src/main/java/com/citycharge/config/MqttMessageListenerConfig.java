@@ -4,6 +4,7 @@ import com.citycharge.service.MqttVehicleStatusService;
 import com.citycharge.service.VehicleOnlineStatusService;
 import com.citycharge.service.BatteryAlarmService;
 import com.citycharge.service.UserVehicleMqttService;
+import com.citycharge.service.MessageMqttService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -16,6 +17,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 
 import javax.annotation.PreDestroy;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 @Slf4j
@@ -26,6 +28,7 @@ public class MqttMessageListenerConfig {
     private final VehicleOnlineStatusService onlineStatusService;
     private final BatteryAlarmService batteryAlarmService;
     private final UserVehicleMqttService userVehicleMqttService;
+    private final MessageMqttService messageMqttService;
     private MqttClient mqttClient;
     
     @EventListener(ApplicationReadyEvent.class)
@@ -70,7 +73,21 @@ public class MqttMessageListenerConfig {
                 handleUserVehicleStatusMessage(topic, message);
             });
             
-            log.info("MQTT订阅成功，主题: {}, {}, {}, {}", vehicleStatusTopic, vehicleOnlineTopic, batteryAlarmTopic, userVehicleStatusTopic);
+            // 订阅换电完成消息主题
+            String swapCompleteTopic = "swap/+/complete";
+            mqttClient.subscribe(swapCompleteTopic, 1, (topic, message) -> {
+                handleSwapCompleteMessage(topic, message);
+            });
+            
+            // 订阅报警通知消息主题
+            String alertNotifyTopic = "alert/+/notify";
+            mqttClient.subscribe(alertNotifyTopic, 1, (topic, message) -> {
+                handleAlertNotifyMessage(topic, message);
+            });
+            
+            log.info("MQTT订阅成功，主题: {}, {}, {}, {}, {}, {}", 
+                vehicleStatusTopic, vehicleOnlineTopic, batteryAlarmTopic, 
+                userVehicleStatusTopic, swapCompleteTopic, alertNotifyTopic);
             
         } catch (Exception e) {
             log.error("MQTT初始化失败: {}", e.getMessage(), e);
@@ -79,7 +96,7 @@ public class MqttMessageListenerConfig {
     
     private void handleVehicleStatusMessage(String topic, MqttMessage message) {
         try {
-            String payload = new String(message.getPayload());
+            String payload = new String(message.getPayload(), StandardCharsets.UTF_8);
             log.info("收到MQTT消息，主题: {}, 内容: {}", topic, payload);
             vehicleStatusService.handleVehicleStatusMessage(topic, payload);
         } catch (Exception e) {
@@ -89,7 +106,7 @@ public class MqttMessageListenerConfig {
     
     private void handleOnlineStatusMessage(String topic, MqttMessage message) {
         try {
-            String payload = new String(message.getPayload());
+            String payload = new String(message.getPayload(), StandardCharsets.UTF_8);
             log.info("收到在线状态消息，主题: {}, 内容: {}", topic, payload);
             
             // 从主题中提取车辆编号
@@ -116,7 +133,7 @@ public class MqttMessageListenerConfig {
     
     private void handleBatteryAlarmMessage(String topic, MqttMessage message) {
         try {
-            String payload = new String(message.getPayload());
+            String payload = new String(message.getPayload(), StandardCharsets.UTF_8);
             log.info("收到电池报警消息，主题: {}, 内容: {}", topic, payload);
             
             // 从主题中提取车辆编号
@@ -143,13 +160,37 @@ public class MqttMessageListenerConfig {
     
     private void handleUserVehicleStatusMessage(String topic, MqttMessage message) {
         try {
-            String payload = new String(message.getPayload());
+            String payload = new String(message.getPayload(), StandardCharsets.UTF_8);
             log.info("收到用户车辆状态消息，主题: {}, 内容: {}", topic, payload);
             
             userVehicleMqttService.handleUserVehicleStatus(topic, payload);
             
         } catch (Exception e) {
             log.error("处理用户车辆状态消息失败，主题: {}, 错误: {}", topic, e.getMessage(), e);
+        }
+    }
+    
+    private void handleSwapCompleteMessage(String topic, MqttMessage message) {
+        try {
+            String payload = new String(message.getPayload(), StandardCharsets.UTF_8);
+            log.info("收到换电完成消息，主题: {}, 内容: {}", topic, payload);
+            
+            messageMqttService.handleSwapCompleteMessage(topic, payload);
+            
+        } catch (Exception e) {
+            log.error("处理换电完成消息失败，主题: {}, 错误: {}", topic, e.getMessage(), e);
+        }
+    }
+    
+    private void handleAlertNotifyMessage(String topic, MqttMessage message) {
+        try {
+            String payload = new String(message.getPayload(), StandardCharsets.UTF_8);
+            log.info("收到报警通知消息，主题: {}, 内容: {}", topic, payload);
+            
+            messageMqttService.handleAlertNotifyMessage(topic, payload);
+            
+        } catch (Exception e) {
+            log.error("处理报警通知消息失败，主题: {}, 错误: {}", topic, e.getMessage(), e);
         }
     }
     
