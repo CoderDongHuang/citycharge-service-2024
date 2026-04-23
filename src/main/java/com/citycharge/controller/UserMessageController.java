@@ -24,11 +24,20 @@ public class UserMessageController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String source,
             @RequestParam(required = false) Boolean isRead,
-            @RequestParam(required = false) String sort) {
+            @RequestParam(required = false) String sort,
+            @RequestHeader(value = "X-User-ID", required = false) Long headerUserId) {
         
-        Long userId = AuthUtil.getCurrentUserId();
+        Long userId = headerUserId;
         if (userId == null) {
-            return ApiResponse.error("请先登录");
+            userId = AuthUtil.getCurrentUserId();
+        }
+        
+        if (userId == null) {
+            return ApiResponse.error(401, "请先登录");
+        }
+        
+        if (!validateUserAccess(userId)) {
+            return ApiResponse.error(403, "无权访问其他用户的消息");
         }
         
         UserMessageListResponseDTO result = userMessageService.getMessages(userId, page, size, category, source, isRead, sort);
@@ -36,10 +45,20 @@ public class UserMessageController {
     }
     
     @GetMapping("/unread-count")
-    public ApiResponse<UnreadCountDTO> getUnreadCount() {
-        Long userId = AuthUtil.getCurrentUserId();
+    public ApiResponse<UnreadCountDTO> getUnreadCount(
+            @RequestHeader(value = "X-User-ID", required = false) Long headerUserId) {
+        
+        Long userId = headerUserId;
         if (userId == null) {
-            return ApiResponse.error("请先登录");
+            userId = AuthUtil.getCurrentUserId();
+        }
+        
+        if (userId == null) {
+            return ApiResponse.error(401, "请先登录");
+        }
+        
+        if (!validateUserAccess(userId)) {
+            return ApiResponse.error(403, "无权访问其他用户的消息");
         }
         
         UnreadCountDTO result = userMessageService.getUnreadCount(userId);
@@ -47,10 +66,21 @@ public class UserMessageController {
     }
     
     @GetMapping("/{id}")
-    public ApiResponse<UserMessageDetailDTO> getMessageDetail(@PathVariable Long id) {
-        Long userId = AuthUtil.getCurrentUserId();
+    public ApiResponse<UserMessageDetailDTO> getMessageDetail(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-ID", required = false) Long headerUserId) {
+        
+        Long userId = headerUserId;
         if (userId == null) {
-            return ApiResponse.error("请先登录");
+            userId = AuthUtil.getCurrentUserId();
+        }
+        
+        if (userId == null) {
+            return ApiResponse.error(401, "请先登录");
+        }
+        
+        if (!validateUserAccess(userId)) {
+            return ApiResponse.error(403, "无权访问其他用户的消息");
         }
         
         UserMessageDetailDTO result = userMessageService.getMessageDetail(userId, id);
@@ -58,10 +88,21 @@ public class UserMessageController {
     }
     
     @PutMapping("/{id}/read")
-    public ApiResponse<Map<String, Object>> markAsRead(@PathVariable Long id) {
-        Long userId = AuthUtil.getCurrentUserId();
+    public ApiResponse<Map<String, Object>> markAsRead(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-ID", required = false) Long headerUserId) {
+        
+        Long userId = headerUserId;
         if (userId == null) {
-            return ApiResponse.error("请先登录");
+            userId = AuthUtil.getCurrentUserId();
+        }
+        
+        if (userId == null) {
+            return ApiResponse.error(401, "请先登录");
+        }
+        
+        if (!validateUserAccess(userId)) {
+            return ApiResponse.error(403, "无权操作其他用户的消息");
         }
         
         Map<String, Object> result = userMessageService.markAsRead(userId, id);
@@ -69,22 +110,48 @@ public class UserMessageController {
     }
     
     @PutMapping("/read-batch")
-    public ApiResponse<Map<String, Object>> markAsReadBatch(@RequestBody Map<String, List<Long>> request) {
-        Long userId = AuthUtil.getCurrentUserId();
+    public ApiResponse<Map<String, Object>> markAsReadBatch(
+            @RequestBody Map<String, Object> request,
+            @RequestHeader(value = "X-User-ID", required = false) Long headerUserId) {
+        
+        Long userId = headerUserId;
         if (userId == null) {
-            return ApiResponse.error("请先登录");
+            userId = getLongFromMap(request, "userId");
+        }
+        if (userId == null) {
+            userId = AuthUtil.getCurrentUserId();
         }
         
-        List<Long> messageIds = request.get("messageIds");
+        if (userId == null) {
+            return ApiResponse.error(401, "请先登录");
+        }
+        
+        if (!validateUserAccess(userId)) {
+            return ApiResponse.error(403, "无权操作其他用户的消息");
+        }
+        
+        @SuppressWarnings("unchecked")
+        List<Long> messageIds = (List<Long>) request.get("messageIds");
         Map<String, Object> result = userMessageService.markAsReadBatch(userId, messageIds);
         return ApiResponse.success("操作成功", result);
     }
     
     @DeleteMapping("/{id}")
-    public ApiResponse<Map<String, Object>> deleteMessage(@PathVariable Long id) {
-        Long userId = AuthUtil.getCurrentUserId();
+    public ApiResponse<Map<String, Object>> deleteMessage(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-ID", required = false) Long headerUserId) {
+        
+        Long userId = headerUserId;
         if (userId == null) {
-            return ApiResponse.error("请先登录");
+            userId = AuthUtil.getCurrentUserId();
+        }
+        
+        if (userId == null) {
+            return ApiResponse.error(401, "请先登录");
+        }
+        
+        if (!validateUserAccess(userId)) {
+            return ApiResponse.error(403, "无权删除其他用户的消息");
         }
         
         Map<String, Object> result = userMessageService.deleteMessage(userId, id);
@@ -92,14 +159,54 @@ public class UserMessageController {
     }
     
     @DeleteMapping("/batch")
-    public ApiResponse<Map<String, Object>> deleteMessageBatch(@RequestBody Map<String, List<Long>> request) {
-        Long userId = AuthUtil.getCurrentUserId();
+    public ApiResponse<Map<String, Object>> deleteMessageBatch(
+            @RequestBody Map<String, Object> request,
+            @RequestHeader(value = "X-User-ID", required = false) Long headerUserId) {
+        
+        Long userId = headerUserId;
         if (userId == null) {
-            return ApiResponse.error("请先登录");
+            userId = getLongFromMap(request, "userId");
+        }
+        if (userId == null) {
+            userId = AuthUtil.getCurrentUserId();
         }
         
-        List<Long> messageIds = request.get("messageIds");
+        if (userId == null) {
+            return ApiResponse.error(401, "请先登录");
+        }
+        
+        if (!validateUserAccess(userId)) {
+            return ApiResponse.error(403, "无权删除其他用户的消息");
+        }
+        
+        @SuppressWarnings("unchecked")
+        List<Long> messageIds = (List<Long>) request.get("messageIds");
         Map<String, Object> result = userMessageService.deleteMessageBatch(userId, messageIds);
         return ApiResponse.success("删除成功", result);
+    }
+    
+    private boolean validateUserAccess(Long requestUserId) {
+        Long currentUserId = AuthUtil.getCurrentUserId();
+        if (currentUserId == null) {
+            return true;
+        }
+        return currentUserId.equals(requestUserId);
+    }
+    
+    private Long getLongFromMap(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Integer) {
+            return ((Integer) value).longValue();
+        }
+        if (value instanceof Long) {
+            return (Long) value;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        return null;
     }
 }
